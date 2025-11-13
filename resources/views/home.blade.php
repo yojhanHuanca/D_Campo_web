@@ -33,7 +33,9 @@
                         <a href="#" class="text-success fs-5" ><i class="bi bi-cart3"></i></a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="btn btn-success rounded-pill px-3"><i class="bi bi-person"></i> Ingresar</a>
+                        <a href="{{ route('auth.login.form') }}" class="btn btn-success rounded-pill px-3">
+                            <i class="bi bi-person"></i> Ingresar
+                        </a>
                     </li>
                 </ul>
             </div>

@@ -54,6 +54,12 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
+        if (!Auth::attempt($credentials)) {
+            return back()->withErrors([
+                'email' => 'Las credenciales no coinciden con nuestros registros.',
+            ])->onlyInput('email');
+        }
+
         // Intentar iniciar sesión
         if (Auth::user()->rol === 'admin') {
             // Si el usuario es administrador
