@@ -6,97 +6,115 @@
     <title>carrito</title>
 </head>
 <body>
-@extends('layouts.app')
+    @extends('layouts.app')
 
 @section('content')
-
 <div class="container py-4">
 
     <h2 class="fw-bold mb-4">Mi Carrito</h2>
 
-    {{-- Si el carrito está vacío --}}
     @if($items->isEmpty())
 
+        {{-- CARRITO VACÍO --}}
         <div class="text-center py-5">
 
-            <img src="https://cdn-icons-png.flaticon.com/512/102/102661.png"
-                 alt="Carrito vacío"
-                 width="120"
-                 class="mb-4 opacity-75">
+            <img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png"
+                 width="110" class="mb-4">
 
-            <h4 class="fw-bold mb-3">Tu carrito está vacío</h4>
+            <h3 class="fw-bold">Tu carrito está vacío</h3>
 
-            <p class="text-muted mb-4">
-                Parece que todavía no agregaste ningún producto.
+            <p class="text-muted mt-2">
+                Agrega tus productos favoritos para comenzar tu compra.
             </p>
 
-            <a href="{{ route('home') }}" class="btn btn-success">
-                Ir a la tienda
+            <a href="{{ route('store.index') }}" class="btn btn-success mt-3 px-4">
+                🛍 Explorar productos
+            </a>
+
+            <br><br>
+
+            <a href="{{ route('home') }}" class="btn btn-outline-secondary px-4">
+                ← Volver al inicio
             </a>
 
         </div>
 
     @else
 
-        {{-- Carrito lleno --}}
+        @php
+            $subtotal = 0;
+        @endphp
 
         @foreach($items as $item)
-            <div class="card mb-3">
-                <div class="card-body d-flex">
+            @php
+                $subtotal += $item->producto->precio * $item->cantidad;
+            @endphp
 
-                    {{-- Imagen --}}
-                    @if($item->producto->imagen)
-                        <img src="{{ asset('storage/' . $item->producto->imagen) }}"
-                             width="80"
-                             height="80"
-                             class="rounded me-3">
-                    @else
-                        <div class="bg-light border me-3"
-                             style="width:80px;height:80px;">
-                        </div>
-                    @endif
+            <div class="d-flex justify-content-between align-items-center border rounded p-3 mb-3">
 
-                    {{-- Datos --}}
-                    <div class="flex-grow-1">
-                        <h5 class="mb-1">{{ $item->producto->nombre }}</h5>
-
-                        <p class="mb-1 text-muted">
-                            Precio: S/ {{ number_format($item->precio_unitario, 2) }}
-                        </p>
-
-                        {{-- Actualizar cantidad --}}
-                        <form action="{{ route('cart.update', $item->id) }}" method="POST" class="d-flex">
-                            @csrf
-                            <input type="number" name="cantidad" min="1" value="{{ $item->cantidad }}"
-                                   class="form-control w-25 me-2">
-                            <button class="btn btn-primary btn-sm">Actualizar</button>
-                        </form>
+                <div>
+                    <strong>{{ $item->producto->nombre }}</strong>
+                    <div class="text-muted">
+                        S/ {{ number_format($item->producto->precio, 2) }}
                     </div>
-
-                    {{-- Eliminar --}}
-                    <form action="{{ route('cart.remove', $item->id) }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <button class="btn btn-danger btn-sm">Eliminar</button>
-                    </form>
-
                 </div>
+
+                <form action="{{ route('cart.update') }}" method="POST" class="d-flex align-items-center">
+                    @csrf
+                    <input type="hidden" name="item_id" value="{{ $item->id }}">
+
+                    <input type="number"
+                           name="cantidad"
+                           min="1"
+                           value="{{ $item->cantidad }}"
+                           class="form-control"
+                           style="width:80px;">
+
+                    <button class="btn btn-sm btn-primary ms-2">Actualizar</button>
+                </form>
+
+                <form action="{{ route('cart.remove') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="item_id" value="{{ $item->id }}">
+                    <button class="btn btn-sm btn-danger">Eliminar</button>
+                </form>
             </div>
         @endforeach
 
-        {{-- Vaciar carrito --}}
-        <form action="{{ route('cart.clear') }}" method="POST">
-            @csrf
-            @method('DELETE')
-            <button class="btn btn-outline-danger">Vaciar carrito</button>
-        </form>
+        {{-- Resumen --}}
+        <div class="border p-3 rounded mt-4">
+            <h5>Resumen del pedido</h5>
+
+            <div class="d-flex justify-content-between">
+                <span>Subtotal</span>
+                <span>S/ {{ number_format($subtotal, 2) }}</span>
+            </div>
+
+            @php
+                $igv = $subtotal * 0.18;
+            @endphp
+
+            <div class="d-flex justify-content-between">
+                <span>IGV (18%)</span>
+                <span>S/ {{ number_format($igv, 2) }}</span>
+            </div>
+
+            <hr>
+
+            <div class="d-flex justify-content-between fw-bold">
+                <span>Total</span>
+                <span>S/ {{ number_format($subtotal + $igv, 2) }}</span>
+            </div>
+
+            <button class="btn btn-success w-100 mt-3">
+                Continuar con el envío →
+            </button>
+        </div>
 
     @endif
 
 </div>
-
 @endsection
-
 
 </body>
 </html>

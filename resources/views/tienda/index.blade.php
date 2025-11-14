@@ -1,27 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tienda - D'Campo</title>
+    <title>D'Campo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 </head>
+
 <body>
-    @extends('layouts.app')
 
-@section('content')
+    <!-- 🌿 NAVBAR COMO EN TU IMAGEN -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3">
+        <div class="container">
+            <!-- Logo -->
+            <a class="navbar-brand fw-bold text-success fs-4" href="#">
+                D'CAMPO
+            </a>
 
-<div class="container py-4">
+            <!-- Menú centrado -->
+            <div class="navbar-collapse">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item mx-3"><a class="nav-link text-dark fw-medium" href="#">Inicio</a></li>
+                    <li class="nav-item mx-3"><a class="nav-link text-dark fw-medium" href="{{ route('store.index') }}">Tienda</a></li>
+                    <li class="nav-item mx-3"><a class="nav-link text-dark fw-medium" href="#">Nosotros</a></li>
+                    <li class="nav-item mx-3"><a class="nav-link text-dark fw-medium" href="#">Contacto</a></li>
+                </ul>
+            </div>
 
-    {{-- HERO SECTION --}}
-    <section class="mb-5">
-        <div class="p-5 mb-3 text-center" style="background:#e5f0e6; border-radius:16px;">
-            <p class="mb-2 text-muted">Productos Destacados</p>
-            <h1 class="fw-bold display-6">Cosmética Natural Premium</h1>
-            <p class="mb-0 fs-5">
-                Descubre nuestra colección de productos elaborados con <strong>palta 100% orgánica</strong>.
-            </p>
+            <!-- Solo el icono del carrito (sin login) -->
+            <div class="d-flex align-items-center">
+                <a href="{{ route('cart.index') }}" class="text-dark fs-5 position-relative">
+                    <i class="bi bi-cart3"></i>
+                    @if(isset($cartCount) && $cartCount > 0)
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                        {{ $cartCount }}
+                    </span>
+                    @endif
+                </a>
+            </div>
         </div>
-    </section>
+    </nav>
+
+    <!-- CONTENIDO DE LA PÁGINA -->
+    <div class="container py-4">
+        {{-- HERO SECTION --}}
+        <section class="mb-5">
+            <div class="p-5 mb-3 text-center" style="background:#e5f0e6; border-radius:16px;">
+                <p class="mb-2 text-muted">Productos Destacados</p>
+                <h1 class="fw-bold display-6">Cosmética Natural Premium</h1>
+                <p class="mb-0 fs-5">
+                    Descubre nuestra colección de productos elaborados con <strong>palta 100% orgánica</strong>.
+                </p>
+            </div>
+        </section>
+
+        {{-- ... el resto de tu contenido de tienda ... --}}
+    </div>
 
     {{-- FILTROS --}}
     <section class="mb-4">
@@ -92,7 +127,7 @@
 
                             {{-- Descripción corta --}}
                             <p class="small text-muted mb-2 flex-grow-1">
-                                {{ $producto->descripcion ? Str::limit($producto->descripcion, 80) : 'Sin descripción' }}
+                                {{ Str::limit($producto->descripcion, 80) }}
                             </p>
 
                             {{-- Precio --}}
@@ -129,6 +164,5 @@
 
 </div>
 
-@endsection
 </body>
 </html>

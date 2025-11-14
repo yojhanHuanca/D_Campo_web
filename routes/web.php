@@ -5,6 +5,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\CategoriaController;
 use App\Http\Controllers\Admin\ProductoController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\StoreController;
 
 
 
@@ -78,5 +80,15 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/admin/productos/{id}', [ProductoController::class, 'destroy'])->name('admin.productos.destroy');
 });
 
+// Carrito (solo usuarios registrados)
+Route::middleware('auth')->group(function () {
+    Route::get('/carrito', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/carrito/agregar', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/carrito/actualizar', [CartController::class, 'update'])->name('cart.update');
+    Route::post('/carrito/eliminar', [CartController::class, 'remove'])->name('cart.remove');
+});
 
 
+
+Route::get('/tienda', [StoreController::class, 'index'])->name('store.index');
+Route::get('/producto/{id}', [StoreController::class, 'show'])->name('store.show');

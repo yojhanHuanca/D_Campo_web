@@ -3,86 +3,83 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\CartItem;
 use App\Models\Producto;
-use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
-    // Mostrar carrito
+    // Ver carrito
     public function index()
     {
-        if (!Auth::check()) {
-            return redirect()->route('auth.login.form')
-                ->with('error', 'Debes iniciar sesión para ver tu carrito.');
-        }
-    
-        $items = CartItem::where('user_id', Auth::id())->get();
-    
+        $items = CartItem::with('producto')
+            ->where('user_id', Auth::id())
+            ->get();
+
         return view('cart.index', compact('items'));
     }
 
-    // Agregar producto al carrito
+    // Agregar producto
     public function add(Request $request)
     {
-        if (!Auth::check()) {
-            return response()->json(['error' => 'Debe iniciar sesión'], 401);
-        }
         $request->validate([
-            'product_id' => 'required|exists:productos,id',
-            'cantidad' => 'required|integer|min:1',
+            'product0_id' => 'required|exists:productos,id',
+            'cantidad' => 'required|integer|min:1'
         ]);
 
         $producto = Producto::find($request->product_id);
 
-        // Verificar si ya existe en el carrito
+        // Buscar si ya está en el carrito
         $item = CartItem::where('user_id', Auth::id())
-                ->where('product_id', $producto->id)
-                ->first();
+            ->where('producto_id', $producto->id)
+            ->first();
 
-                if ($item) {
-                    $item->cantidad += $request->cantidad;
-                    $item->save();
-                } else {
-                    CartItem::create([
-                        'user_id' => Auth::id(),
-                        'product_id' => $producto->id,
-                        'cantidad' => $request->cantidad,
-                        'precio_unitario' => $producto->precio
-                    ]);
+        if ($item) {
+            // Si ya está, solo aumentamos la cantidad
+            $item->cantidad += $request->cantidad;
+            $item->save();
+        } else {
+            // Si no está, lo creamos
+            CartItem::create([
+                'user_id' => Auth::id(),
+                'producto_id' => $producto->id,
+                'cantidad' => $request->cantidad,
+            ]);
         }
 
-        return back()->with('success', 'Producto agregado al carrito.');
+        return redirect()->route('cart.index')
+            ->with('success', 'Producto agregado al carrito.');
     }
 
-    // Actualizar cantidad
-    public function update(Request $request, $id)
+    // Actualizar cantidad (sumar o restar)
+    public function update(Request $request)
     {
         $request->validate([
-            'cantidad' => 'required|integer|min:1',
+            'item_id' => 'required|exists:cart_items,id',
+            'cantidad' => 'required|integer|min:1'
         ]);
 
-        $item = CartItem::where('user_id', Auth::id())->findOrFail($id);
+        $item = CartItem::where('id', $request->item_id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
         $item->cantidad = $request->cantidad;
         $item->save();
 
-        return back()->with('success', 'Cantidad actualizada.');
+        return back();
     }
 
-    // Eliminar un producto del carrito
-    public function remove($id)
+    // Eliminar del carrito
+    public function remove(Request $request)
     {
-        $item = CartItem::where('user_id', Auth::id())->findOrFail($id);
-        $item->delete();
+        $request->validate([
+            'item_id' => 'required|exists:cart_items,id',
+        ]);
+
+        CartItem::where('id', $request->item_id)
+            ->where('user_id', Auth::id())
+            ->delete();
 
         return back()->with('success', 'Producto eliminado del carrito.');
-    }
-
-    // Vaciar carrito
-    public function clear()
-    {
-        CartItem::where('user_id', Auth::id())->delete();
-
-        return back()->with('success', 'Carrito vaciado.');
     }
 }
