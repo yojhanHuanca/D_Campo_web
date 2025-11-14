@@ -145,8 +145,9 @@
                                 <form action="{{ route('cart.add') }}" method="POST" class="flex-fill">
                                     @csrf
                                     <input type="hidden" name="product_id" value="{{ $producto->id }}">
-                                    <input type="hidden" name="cantidad" value="1">
-                                    <button class="btn btn-success btn-sm w-100">
+                                    <label>Cantidad</label>
+                                    <input type="number" name="cantidad" value="1" min="1" >
+                                    <button type="submit" class="btn btn-success btn-sm w-100">
                                         Agregar
                                     </button>
                                 </form>

@@ -22,8 +22,15 @@ class CartController extends Controller
     // Agregar producto
     public function add(Request $request)
     {
+
+        if (!Auth::check()) {
+            return redirect()->route('auth.login.form')
+
+                ->with('error', 'Debes iniciar sesión para agregar productos al carrito.');
+        }
+
         $request->validate([
-            'product0_id' => 'required|exists:productos,id',
+            'product_id' => 'required|exists:productos,id',
             'cantidad' => 'required|integer|min:1'
         ]);
 
@@ -31,19 +38,19 @@ class CartController extends Controller
 
         // Buscar si ya está en el carrito
         $item = CartItem::where('user_id', Auth::id())
-            ->where('producto_id', $producto->id)
+            ->where('product_id', $producto->id)
             ->first();
 
         if ($item) {
             // Si ya está, solo aumentamos la cantidad
-            $item->cantidad += $request->cantidad;
-            $item->save();
-        } else {
+            //$item->increment('cantidad', $request->cantidad);
+        
             // Si no está, lo creamos
             CartItem::create([
                 'user_id' => Auth::id(),
-                'producto_id' => $producto->id,
+                'product_id' => $producto->id,
                 'cantidad' => $request->cantidad,
+                'precio_unitario' => $producto->precio,
             ]);
         }
 

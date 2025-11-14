@@ -9,6 +9,11 @@ class CartItem extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+    public $incrementing = false; 
+    protected $primaryKey = null;
+
+     
     protected $table = 'cart_items';
 
     protected $fillable = [
@@ -16,7 +21,14 @@ class CartItem extends Model
         'product_id',
         'cantidad',
         'precio_unitario'
+
     ];
+
+    protected function setKeysForSaveQuery($query)
+    {
+        return $query->where('user_id', $this->user_id)
+                    ->where('product_id', $this->product_id);
+    }
 
     // Relación con usuario
     public function user()
