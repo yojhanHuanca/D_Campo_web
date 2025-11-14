@@ -43,7 +43,8 @@ class CartController extends Controller
 
         if ($item) {
             // Si ya está, solo aumentamos la cantidad
-            //$item->increment('cantidad', $request->cantidad);
+            $item->increment('cantidad', $request->cantidad);
+        } else {
         
             // Si no está, lo creamos
             CartItem::create([
@@ -54,8 +55,7 @@ class CartController extends Controller
             ]);
         }
 
-        return redirect()->route('cart.index')
-            ->with('success', 'Producto agregado al carrito.');
+        return redirect()->back()->with('success', 'Producto agregado al carrito.');
     }
 
     // Actualizar cantidad (sumar o restar)

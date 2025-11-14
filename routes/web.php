@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CategoriaController;
 use App\Http\Controllers\Admin\ProductoController;
 use App\Http\Controllers\CartController;
@@ -29,55 +30,38 @@ Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
 
 // PANEL DE ADMINISTRACIÓN
-Route::get('/admin/dashboard', function () {
-    return view('admin.dashboard');
-})->middleware(['auth', 'admin'])->name('admin.dashboard');
+Route::get('/admin/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'admin'])
+    ->name('admin.dashboard');
 
 // HOME DE CLIENTE
 Route::get('/home', function () {
     return 'Bienvenido al Home del cliente ';
 })->name('home');
 
-Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/admin/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
 
-    // RUTAS DE CATEGORÍAS
+
+// RUTAS ADMIN (CATEGORÍAS + PRODUCTOS)
+Route::middleware(['auth', 'admin'])->group(function () {
+
+    // CATEGORÍAS
     Route::get('/admin/categorias', [CategoriaController::class, 'index'])->name('admin.categorias.index');
     Route::get('/admin/categorias/crear', [CategoriaController::class, 'create'])->name('admin.categorias.create');
     Route::post('/admin/categorias', [CategoriaController::class, 'store'])->name('admin.categorias.store');
-    
-    //Editar categoría
 
     Route::get('/admin/categorias/{id}/editar', [CategoriaController::class, 'edit'])->name('admin.categorias.edit');
-    
-    // Actualizar categoría
-    Route::put('/admin/categorias/{id}', [CategoriaController::class, 'update'])
-        ->name('admin.categorias.update');
+    Route::put('/admin/categorias/{id}', [CategoriaController::class, 'update'])->name('admin.categorias.update');
+    Route::delete('/admin/categorias/{id}', [CategoriaController::class, 'destroy'])->name('admin.categorias.destroy');
 
-    //Eliminar categoría
 
-    Route::delete('/admin/categorias/{id}', [CategoriaController::class, 'destroy'])
-        ->name('admin.categorias.destroy');
-
-    // RUTAS DE PRODUCTOS
+    // PRODUCTOS
     Route::get('/admin/productos', [ProductoController::class, 'index'])->name('admin.productos.index');
-
-    // formularuio de creación de productos
     Route::get('/admin/productos/crear', [ProductoController::class, 'create'])->name('admin.productos.create');
-
-    // PRODUCTOS – GUARDAR NUEVO
     Route::post('/admin/productos', [ProductoController::class, 'store'])->name('admin.productos.store');
-
-    // FORMULARIO EDITAR PRODUCTO
     Route::get('/admin/productos/{id}/editar', [ProductoController::class, 'edit'])->name('admin.productos.edit');
-
-    // ACTUALIZAR PRODUCTO
     Route::put('/admin/productos/{id}', [ProductoController::class, 'update'])->name('admin.productos.update');
-
-    // ELIMINAR PRODUCTO
     Route::delete('/admin/productos/{id}', [ProductoController::class, 'destroy'])->name('admin.productos.destroy');
+
 });
 
 // Carrito (solo usuarios registrados)

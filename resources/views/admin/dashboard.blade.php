@@ -19,8 +19,10 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body">
                     <h5 class="card-title">Total Productos</h5>
-                    <h2 class="fw-bold">8</h2>
-                    <a href="#" class="btn btn-success btn-sm mt-3">Ver más</a>
+                    <h2 class="fw-bold">{{ $totalProductos }}</h2>
+                    <a href="{{ route('admin.productos.index') }}" class="btn btn-success btn-sm mt-3">
+                         Ver más
+                    </a>
                 </div>
             </div>
         </div>
