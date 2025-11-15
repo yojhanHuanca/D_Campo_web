@@ -9,74 +9,104 @@
     @extends('admin.layout')
 
 @section('content')
-    <h2 class="fw-bold mb-4">Nuevo Producto</h2>
+<div class="container">
 
-    {{-- Mensajes de error --}}
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <strong>Hay errores:</strong>
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+    {{-- Título --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">➕ Nuevo Producto</h2>
+        <a href="{{ route('admin.productos.index') }}" class="btn btn-outline-secondary btn-sm">
+            ← Volver a Productos
+        </a>
+    </div>
+
+    {{-- Card principal --}}
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+
+            {{-- Mensajes de error --}}
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <strong>Revisa estos errores:</strong>
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            {{-- Formulario --}}
+            <form action="{{ route('admin.productos.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+
+                <div class="row">
+
+                    {{-- Nombre --}}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Nombre del producto</label>
+                        <input type="text" name="nombre" class="form-control shadow-sm" value="{{ old('nombre') }}" required>
+                    </div>
+
+                    {{-- Precio --}}
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-semibold">Precio (S/)</label>
+                        <input type="number" name="precio" step="0.01" min="0" class="form-control shadow-sm"
+                               value="{{ old('precio') }}" required>
+                    </div>
+
+                    {{-- Stock --}}
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-semibold">Stock</label>
+                        <input type="number" name="stock" min="0" class="form-control shadow-sm"
+                               value="{{ old('stock', 0) }}" required>
+                    </div>
+
+                    {{-- Categoría --}}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Categoría</label>
+                        <select name="categoria_id" class="form-select shadow-sm">
+                            <option value="">Sin categoría</option>
+                            @foreach($categorias as $categoria)
+                                <option value="{{ $categoria->id }}" 
+                                    {{ old('categoria_id') == $categoria->id ? 'selected' : '' }}>
+                                    {{ $categoria->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Imagen --}}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Imagen del producto</label>
+                        <input type="file" name="imagen" class="form-control shadow-sm" accept="image/*">
+                        <small class="text-muted">Formatos: JPG, JPEG, PNG, WEBP (máx. 2MB)</small>
+                    </div>
+
+                    {{-- Descripción corta --}}
+                    <div class="col-12 mb-3">
+                        <label class="form-label fw-semibold">Descripción corta</label>
+                        <textarea name="descripcion_corta" class="form-control shadow-sm" rows="3">{{ old('descripcion_corta') }}</textarea>
+                    </div>
+                </div>
+
+                {{-- Footer --}}
+                <div class="d-flex justify-content-end mt-4">
+                    <a href="{{ route('admin.productos.index') }}" class="btn btn-secondary me-2">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        Guardar Producto
+                    </button>
+                </div>
+
+            </form>
+
         </div>
-    @endif
+    </div>
 
-    {{-- Formulario --}}
-    <form action="{{ route('admin.productos.store') }}" method="POST" enctype="multipart/form-data">
-        @csrf
-
-        {{-- Nombre --}}
-        <div class="mb-3">
-            <label class="form-label">Nombre del producto</label>
-            <input type="text" name="nombre" class="form-control" value="{{ old('nombre') }}" required>
-        </div>
-
-        {{-- Precio --}}
-        <div class="mb-3">
-            <label class="form-label">Precio (S/)</label>
-            <input type="number" name="precio" step="0.01" min="0" class="form-control"
-                   value="{{ old('precio') }}" required>
-        </div>
-
-        {{-- Stock --}}
-        <div class="mb-3">
-            <label class="form-label">Stock</label>
-            <input type="number" name="stock" min="0" class="form-control"
-                   value="{{ old('stock', 0) }}" required>
-        </div>
-
-        {{-- Categoría --}}
-        <div class="mb-3">
-            <label class="form-label">Categoría</label>
-            <select name="categoria_id" class="form-select">
-                <option value="">Sin categoría</option>
-                @foreach($categorias as $categoria)
-                    <option value="{{ $categoria->id }}" {{ old('categoria_id') == $categoria->id ? 'selected' : '' }}>
-                        {{ $categoria->nombre }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
-        {{-- Descripción corta --}}
-        <div class="mb-3">
-            <label class="form-label">Descripción corta</label>
-            <textarea name="descripcion_corta" class="form-control" rows="3">{{ old('descripcion_corta') }}</textarea>
-        </div>
-
-        {{-- Imagen --}}
-        <div class="mb-3">
-            <label class="form-label">Imagen del producto</label>
-            <input type="file" name="imagen" class="form-control" accept="image/*">
-            <small class="text-muted">Formatos permitidos: JPG, JPEG, PNG, WEBP. Máx: 2MB</small>
-        </div>
-
-        <button type="submit" class="btn btn-success">Guardar</button>
-        <a href="{{ route('admin.productos.index') }}" class="btn btn-secondary">Cancelar</a>
-    </form>
+</div>
 @endsection
+
 
 </body>
 </html>

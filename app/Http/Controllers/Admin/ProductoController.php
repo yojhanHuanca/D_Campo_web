@@ -10,10 +10,27 @@ use Illuminate\Http\Request;
 class ProductoController extends Controller
 {
     // LISTAR PRODUCTOS
-    public function index()
+    public function index(Request $request)
     {
         $productos = Producto::with('categoria')->get();
         $categorias = Categoria::all();
+        
+        // Guardar categoría seleccionada (si existe)
+        $categoriaId = $request->get('categoria');
+
+         // Crear consulta base
+         $query = Producto::with('categoria');
+
+            // Filtrar por categoría 
+        if ($categoriaId && $categoriaId != 'todas'){
+            $query->where('categoria_id', $categoriaId);
+        } 
+
+        if ($request->filled('buscar')) {
+            $query->where('nombre', 'like', '%' . $request->buscar . '%');
+        }
+
+        $productos = $query->get();
 
         return view('admin.productos.index', compact('productos', 'categorias'));
     }
