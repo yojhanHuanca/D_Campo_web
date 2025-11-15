@@ -10,37 +10,8 @@
 
 <body>
 
-    <!-- 🌿 NAVBAR COMO EN TU IMAGEN -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3">
-        <div class="container">
-            <!-- Logo -->
-            <a class="navbar-brand fw-bold text-success fs-4" href="#">
-                D'CAMPO
-            </a>
+    @include('partials.header')
 
-            <!-- Menú centrado -->
-            <div class="navbar-collapse">
-                <ul class="navbar-nav mx-auto">
-                    <li class="nav-item mx-3"><a class="nav-link text-dark fw-medium" href="#">Inicio</a></li>
-                    <li class="nav-item mx-3"><a class="nav-link text-dark fw-medium" href="{{ route('store.index') }}">Tienda</a></li>
-                    <li class="nav-item mx-3"><a class="nav-link text-dark fw-medium" href="#">Nosotros</a></li>
-                    <li class="nav-item mx-3"><a class="nav-link text-dark fw-medium" href="#">Contacto</a></li>
-                </ul>
-            </div>
-
-            <!-- Solo el icono del carrito (sin login) -->
-            <div class="d-flex align-items-center">
-                <a href="{{ route('cart.index') }}" class="text-dark fs-5 position-relative">
-                    <i class="bi bi-cart3"></i>
-                    @if(isset($cartCount) && $cartCount > 0)
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
-                        {{ $cartCount }}
-                    </span>
-                    @endif
-                </a>
-            </div>
-        </div>
-    </nav>
 
     <!-- CONTENIDO DE LA PÁGINA -->
     <div class="container py-4">
@@ -64,14 +35,26 @@
             <h5 class="mb-3">Filtrar productos</h5>
             
             <div class="row g-4">
-                {{-- Categoría --}}
-                <div class="col-md-4">
-                    <label class="form-label fw-medium">Categoría</label>
-                    <select class="form-select">
-                        <option selected>Todos los productos</option>
+                <label class="form-label fw-medium">Categoría</label>
+                <form method="GET" action="{{ route('store.index') }}">
+                    <select name="categoria" class="form-select" onchange="this.form.submit()">
+                        <option value="">Todos los productos</option>
+                        @foreach ($categorias as $cat)
+                            <option value="{{ $cat->id }}"
+                                {{ isset($categoriaId) && $categoriaId == $cat->id ? 'selected' : '' }}>
+                                {{ $cat->nombre }}
+                            </option>
+                        @endforeach
                     </select>
-                </div>
 
+                    {{-- Si existe una búsqueda, mantenerla --}}
+                    @if(isset($busqueda))
+                        <input type="hidden" name="q" value="{{ $busqueda }}">
+                    @endif
+                </form>
+            </div>
+
+                        
                 {{-- Ordenar por --}}
                 <div class="col-md-4">
                     <label class="form-label fw-medium">Ordenar por</label>
@@ -164,6 +147,7 @@
     </section>
 
 </div>
+@include('partials.footer')
 
 </body>
 </html>

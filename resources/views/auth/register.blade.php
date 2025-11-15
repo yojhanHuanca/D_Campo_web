@@ -2,43 +2,104 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Registro - D'Campo</title>
+    <title>Crear Cuenta - D'Campo</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f5f5f5;
+        }
+        .register-box {
+            width: 380px;
+            border-radius: 18px;
+            background: #fff;
+        }
+        .input-custom {
+            background: #faf7f2 !important;
+            border-radius: 10px !important;
+            padding: 12px !important;
+        }
+        .btn-green {
+            background: #79a98c;
+            color: white;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        .btn-green:hover {
+            background: #6b947b;
+        }
+    </style>
 </head>
+
 <body>
-    <h2>Registro de usuario</h2>
 
-    @if ($errors->any())
-        <div>
-            <strong>Errores:</strong>
-            <ul>
+<div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="register-box shadow-sm p-4">
+
+        <!-- Botón regresar -->
+        <a href="{{ route('home') }}" class="text-decoration-none text-muted mb-3 d-inline-block">
+    ← Regresar
+        </a>
+
+        <h3 class="text-center fw-bold">Crear Cuenta</h3>
+        <p class="text-center text-muted mb-4">
+            Regístrate para disfrutar de todos los beneficios
+        </p>
+
+        {{-- Mostrar errores --}}
+        @if ($errors->any())
+            <div class="alert alert-danger py-2">
                 @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
+                    <div>{{ $error }}</div>
                 @endforeach
-            </ul>
-        </div>
-    @endif
+            </div>
+        @endif
 
-    @if (session('success'))
-        <p>{{ session('success') }}</p>
-    @endif
+        {{-- Mensaje éxito --}}
+        @if (session('success'))
+            <div class="alert alert-success py-2">
+                {{ session('success') }}
+            </div>
+        @endif
 
-    <form method="POST" action="{{ route('auth.register') }}">
-        @csrf
-        <label>Nombre:</label><br>
-        <input type="text" name="name" value="{{ old('name') }}"><br><br>
+        {{-- FORMULARIO DE REGISTRO --}}
+        <form method="POST" action="{{ route('auth.register') }}">
+            @csrf
 
-        <label>Correo electrónico:</label><br>
-        <input type="email" name="email" value="{{ old('email') }}"><br><br>
+            <label class="fw-medium">Nombre completo</label>
+            <input type="text" name="name" value="{{ old('name') }}" 
+                   class="form-control input-custom mb-3" required>
 
-        <label>Contraseña:</label><br>
-        <input type="password" name="password"><br><br>
+            <label class="fw-medium">Correo electrónico</label>
+            <input type="email" name="email" value="{{ old('email') }}"
+                   class="form-control input-custom mb-3" required>
 
-        <label>Confirmar contraseña:</label><br>
-        <input type="password" name="password_confirmation"><br><br>
+            <label class="fw-medium">Contraseña</label>
+            <input type="password" name="password"
+                   class="form-control input-custom mb-2" required>
 
-        <button type="submit">Registrar</button>
-    </form>
+            <small class="text-muted">Mínimo 6 caracteres</small>
 
-    <p>¿Ya tienes cuenta? <a href="{{ route('auth.login.form') }}">Inicia sesión aquí</a></p>
+            <label class="fw-medium mt-3">Confirmar contraseña</label>
+            <input type="password" name="password_confirmation"
+                   class="form-control input-custom mb-4" required>
+
+            <button type="submit" class="btn btn-green w-100 py-2">
+                Crear Cuenta
+            </button>
+        </form>
+
+        <p class="text-center mt-3">
+            ¿Ya tienes cuenta?
+            <a href="{{ route('auth.login.form') }}" class="text-success fw-semibold">
+                Inicia sesión aquí
+            </a>
+        </p>
+
+    </div>
+</div>
+
 </body>
 </html>

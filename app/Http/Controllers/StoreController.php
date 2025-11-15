@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\Producto;   
+use App\Models\Producto;
+use App\Models\Categoria;   
 
 use Illuminate\Http\Request;
 
@@ -11,15 +12,30 @@ class StoreController extends Controller
     {
         $busqueda = $request->input('q');
 
-        $query = Producto::query()->where('activo', 1);
+        $categoriaId = $request->input('categoria');
+
+        $categorias = Categoria::all();
+
+        $query = Producto::query()
+            ->where('activo', 1)
+            ->with('categoria');
 
         if ($busqueda) {
              $query->where('nombre', 'like', '%' . $busqueda . '%');
         }
 
-        $productos = $query->with('categoria')->get();
+        if ($categoriaId) {
+            $query->where('categoria_id', $categoriaId);
+        }
 
-        return view('tienda.index', compact('productos', 'busqueda'));
+        $productos = $query->get();
+
+        return view('tienda.index', compact(
+            'productos',
+            'busqueda',
+            'categorias',
+            'categoriaId'
+        ));
     }
 
     public function show($id)
