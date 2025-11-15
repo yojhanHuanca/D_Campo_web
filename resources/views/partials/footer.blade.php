@@ -2,10 +2,10 @@
 
     {{-- Fondos decorativos --}}
     <div class="position-absolute top-0 end-0 rounded-circle bg-white opacity-25"
-         style="width: 350px; height: 350px; filter: blur(90px);"></div>
+        style="width: 350px; height: 350px; filter: blur(90px);"></div>
 
     <div class="position-absolute bottom-0 start-0 rounded-circle bg-light opacity-25"
-         style="width: 350px; height: 350px; filter: blur(90px);"></div>
+        style="width: 350px; height: 350px; filter: blur(90px);"></div>
 
 
     <div class="container py-5 position-relative">
@@ -18,16 +18,31 @@
                 Recibe promociones exclusivas, tips de belleza y novedades directamente en tu correo.
             </p>
 
-            <form class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+            <form action="{{ route('newsletter.subscribe') }}"
+                method="POST"
+                class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+
+                @csrf
+
                 <input type="email"
-                       class="form-control rounded-pill px-4 py-3"
-                       placeholder="Tu correo electrónico">
+                    name="email"
+                    required
+                    class="form-control rounded-pill px-4 py-3"
+                    placeholder="Tu correo electrónico">
 
                 <button type="submit"
-                        class="btn btn-warning text-white rounded-pill px-4 d-flex align-items-center gap-2">
+                    class="btn btn-warning text-white rounded-pill px-4 d-flex align-items-center gap-2">
                     <i class="bi bi-send"></i> Suscribirme
                 </button>
             </form>
+
+            {{-- ALERTA DE ÉXITO --}}
+            @if(session('success'))
+                <div class="alert alert-success mt-4">
+                    {{ session('success') }}
+                </div>
+            @endif
+
         </div>
 
 
@@ -38,7 +53,7 @@
             <div class="col-12 col-md-6 col-lg-3">
                 <div class="d-flex align-items-center mb-3">
                     <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center text-dark"
-                         style="width: 45px; height: 45px; font-weight: 600;">
+                        style="width: 45px; height: 45px; font-weight: 600;">
                         D
                     </div>
                     <span class="ms-3 fs-5">D’CAMPO</span>
@@ -50,17 +65,17 @@
 
                 <div class="d-flex gap-3 mt-3">
                     <a href="#" class="text-white bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center"
-                       style="width: 40px; height: 40px;">
+                        style="width: 40px; height: 40px;">
                         <i class="bi bi-facebook"></i>
                     </a>
 
                     <a href="#" class="text-white bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center"
-                       style="width: 40px; height: 40px;">
+                        style="width: 40px; height: 40px;">
                         <i class="bi bi-instagram"></i>
                     </a>
 
                     <a href="#" class="text-white bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center"
-                       style="width: 40px; height: 40px;">
+                        style="width: 40px; height: 40px;">
                         <i class="bi bi-twitter"></i>
                     </a>
                 </div>
@@ -86,35 +101,35 @@
 
                     <li>
                         <button class="footer-info btn btn-link p-0 text-white-50"
-                                data-info-type="faq">
+                            data-info-type="faq">
                             → Preguntas Frecuentes
                         </button>
                     </li>
 
                     <li>
                         <button class="footer-info btn btn-link p-0 text-white-50"
-                                data-info-type="envios">
+                            data-info-type="envios">
                             → Política de Envíos
                         </button>
                     </li>
 
                     <li>
                         <button class="footer-info btn btn-link p-0 text-white-50"
-                                data-info-type="devoluciones">
+                            data-info-type="devoluciones">
                             → Devoluciones
                         </button>
                     </li>
 
                     <li>
                         <button class="footer-info btn btn-link p-0 text-white-50"
-                                data-info-type="terminos">
+                            data-info-type="terminos">
                             → Términos y Condiciones
                         </button>
                     </li>
 
                     <li>
                         <button class="footer-info btn btn-link p-0 text-white-50"
-                                data-info-type="privacidad">
+                            data-info-type="privacidad">
                             → Privacidad
                         </button>
                     </li>
@@ -139,8 +154,8 @@
 
                     <li class="d-flex gap-2">
                         <i class="bi bi-envelope text-warning"></i>
-                        <a href="mailto:contacto@dcampo.pe" class="text-white-50 text-decoration-none">
-                            contacto@dcampo.pe
+                        <a href="mailto:contacto.dcampo.pe@gmail.com" class="text-white-50 text-decoration-none">
+                            contacto.dcampo.pe@gmail.com
                         </a>
                     </li>
                 </ul>
@@ -156,12 +171,12 @@
 
             <div class="d-flex gap-4">
                 <button class="footer-info btn btn-link p-0 text-white-50"
-                        data-info-type="terminos">
+                    data-info-type="terminos">
                     Términos de Servicio
                 </button>
 
                 <button class="footer-info btn btn-link p-0 text-white-50"
-                        data-info-type="privacidad">
+                    data-info-type="privacidad">
                     Política de Cookies
                 </button>
 
@@ -174,7 +189,7 @@
 </footer>
 
 
-{{-- MODAL PARA FAQ, ENVÍOS, DEVOLUCIONES, TÉRMINOS, PRIVACIDAD --}}
+{{-- MODAL --}}
 <div class="modal fade" id="infoModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
         <div class="modal-content">

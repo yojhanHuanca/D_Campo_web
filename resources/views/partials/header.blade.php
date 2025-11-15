@@ -15,11 +15,12 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        {{-- NAV --}}
         <div class="collapse navbar-collapse" id="mainNavbar">
 
             {{-- MENÚ CENTRO --}}
             <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+
+                {{-- INICIO --}}
                 <li class="nav-item mx-2">
                     <a href="{{ url('/') }}" 
                        class="nav-link {{ request()->is('/') ? 'text-success fw-bold' : '' }}">
@@ -27,6 +28,7 @@
                     </a>
                 </li>
 
+                {{-- TIENDA --}}
                 <li class="nav-item mx-2">
                     <a href="{{ route('store.index') }}" 
                        class="nav-link {{ request()->is('tienda*') ? 'text-success fw-bold' : '' }}">
@@ -34,19 +36,28 @@
                     </a>
                 </li>
 
+                {{-- NOSOTROS --}}
                 <li class="nav-item mx-2">
-                    <a href="#nosotros" class="nav-link">Nosotros</a>
+                    <a href="{{ route('nosotros') }}"
+                       class="nav-link {{ request()->is('nosotros') ? 'text-success fw-bold' : '' }}">
+                        Nosotros
+                    </a>
                 </li>
 
+                {{-- CONTACTO --}}
                 <li class="nav-item mx-2">
-                    <a href="#contacto" class="nav-link">Contacto</a>
+                    <a href="{{ route('contacto') }}"
+                       class="nav-link {{ request()->is('contacto') ? 'text-success fw-bold' : '' }}">
+                        Contacto
+                    </a>
                 </li>
+
             </ul>
 
             {{-- ICONOS DERECHA --}}
             <div class="d-flex align-items-center">
 
-                {{-- CARRITO (SOLO CLIENTE) --}}
+                {{-- CARRITO SOLO PARA CLIENTES --}}
                 @if(!auth()->check() || (auth()->check() && !auth()->user()->is_admin))
                     <a href="{{ route('cart.index') }}" class="text-dark fs-5 position-relative me-4">
                         <i class="bi bi-cart3"></i>

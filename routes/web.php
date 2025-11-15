@@ -8,9 +8,12 @@ use App\Http\Controllers\Admin\CategoriaController;
 use App\Http\Controllers\Admin\ProductoController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\ContactoController; // <-- recomendado
+use App\Http\Controllers\NewsletterController;
 
 
-// Ruta principal del Home (la correcta)
+
+// Ruta principal del Home
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 
@@ -30,7 +33,7 @@ Route::get('/admin/dashboard', [DashboardController::class, 'index'])
     ->name('admin.dashboard');
 
 
-// RUTAS ADMIN: CATEGORÍAS Y PRODUCTOS
+// RUTAS ADMIN
 Route::middleware(['auth', 'admin'])->group(function () {
 
     // CATEGORÍAS
@@ -51,7 +54,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 });
 
 
-// CARRITO (solo usuarios logueados)
+// CARRITO
 Route::middleware('auth')->group(function () {
     Route::get('/carrito', [CartController::class, 'index'])->name('cart.index');
     Route::post('/carrito/agregar', [CartController::class, 'add'])->name('cart.add');
@@ -64,3 +67,22 @@ Route::middleware('auth')->group(function () {
 Route::get('/tienda', [StoreController::class, 'index'])->name('store.index');
 Route::get('/producto/{id}', [StoreController::class, 'show'])->name('store.show');
 
+
+// NOSOTROS
+Route::get('/nosotros', function () {
+    return view('nosotros');
+})->name('nosotros');
+
+
+// CONTACTO
+Route::get('/contacto', function () {
+    return view('contacto');
+})->name('contacto');
+
+Route::post('/contacto/enviar', [ContactoController::class, 'enviar'])
+    ->name('contacto.enviar');
+
+
+//new no se que pero es para que se suscriba
+Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])
+     ->name('newsletter.subscribe');
