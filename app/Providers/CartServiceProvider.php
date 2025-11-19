@@ -4,13 +4,13 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
-use Illuminate\Support\Facades\Auth;
 use App\Models\CartItem;
+use Illuminate\Support\Facades\Auth;
 
-class AppServiceProvider extends ServiceProvider
+class CartServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
+     * Register services.
      */
     public function register(): void
     {
@@ -18,16 +18,16 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Bootstrap any application services.
+     * Bootstrap services.
      */
     public function boot(): void
     {
-         View::composer('*', function ($view) {
+        View::composer('*', function ($view) {
 
             $cartCount = 0;
 
-             if (Auth::check()) {
-            $cartCount = CartItem::where('user_id', Auth::id())->sum('cantidad');
+            if (Auth::check()) {
+                $cartCount = CartItem::where('user_id', Auth::id())->sum('cantidad');
             }
 
             $view->with('cartCount', $cartCount);

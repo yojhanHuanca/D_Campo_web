@@ -60,11 +60,11 @@
                 {{-- CARRITO SOLO PARA CLIENTES --}}
                 @if(!auth()->check() || (auth()->check() && !auth()->user()->is_admin))
                     <a href="{{ route('cart.index') }}" class="text-dark fs-5 position-relative me-4">
-                        <i class="bi bi-cart3"></i>
+                        <i class="bi bi-cart" style="font-size:20px;"></i>
 
-                        @if(isset($cartCount) && $cartCount > 0)
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success"
-                                  style="font-size: .65rem;">
+                        @if($cartCount > 0)
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                  style="font-size:10px;">
                                 {{ $cartCount }}
                             </span>
                         @endif
@@ -110,7 +110,7 @@
 
                             {{-- PERFIL --}}
                             <li>
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="{{ route('perfil.index') }}">
                                     <i class="bi bi-person-circle me-2"></i> Mi Perfil
                                 </a>
                             </li>

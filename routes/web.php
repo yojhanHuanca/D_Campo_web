@@ -10,6 +10,10 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\ContactoController; // <-- recomendado
 use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\PedidoController;
+use App\Http\Controllers\PerfilController;
+
 
 
 
@@ -86,3 +90,54 @@ Route::post('/contacto/enviar', [ContactoController::class, 'enviar'])
 //new no se que pero es para que se suscriba
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])
      ->name('newsletter.subscribe');
+
+
+    // ENVIO DE PEDIDOS
+Route::middleware('auth')->group(function () {
+
+    // Checkout - Envío
+    Route::get('/checkout/envio', [CheckoutController::class, 'envio'])
+        ->name('checkout.envio');
+
+    Route::post('/checkout/envio', [CheckoutController::class, 'guardarEnvio'])
+        ->name('checkout.envio.guardar');
+
+    // Checkout - Pago
+    Route::get('/checkout/pago', [CheckoutController::class, 'pago'])
+        ->name('checkout.pago');
+
+     Route::post('/checkout/pago', [CheckoutController::class, 'guardarPago'])
+        ->name('checkout.pago.submit');
+
+    // CHECKOUT - RESUMEN
+    Route::get('/checkout/resumen', [CheckoutController::class, 'resumen'])
+        ->name('checkout.resumen');
+
+    Route::get('/checkout/confirmacion', [CheckoutController::class, 'confirmarPedido'])
+        ->name('checkout.confirmacion');      
+});
+
+// RUTAS PEDIDOS DE USUARIOS
+Route::middleware('auth')->group(function () {
+    Route::get('/perfil/pedidos', [PedidoController::class, 'index'])
+        ->name('perfil.pedidos');
+    Route::get('/perfil/pedidos/{id}', [PedidoController::class, 'show'])
+        ->name('perfil.pedido.detalle');
+});
+
+//RUTAS DE PEFIL
+Route::middleware('auth')->group(function () {
+    
+    // PERFIL PRINCIPAL
+    Route::get('/perfil', [PerfilController::class, 'index'])
+        ->name('perfil.index');
+
+    Route::post('/perfil/actualizar', [PerfilController::class, 'actualizar'])
+        ->name('perfil.actualizar');
+
+    Route::get('/perfil/pedidos/{id}/boleta', [PedidoController::class, 'descargarBoleta'])
+        ->name('perfil.pedido.boleta');
+
+
+
+});

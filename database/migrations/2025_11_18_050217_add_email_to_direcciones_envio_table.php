@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('cart_items', function (Blueprint $table) {
-            //
+        Schema::table('direcciones_envio', function (Blueprint $table) {
+            $table->string('email')->nullable()->after('telefono');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('cart_items', function (Blueprint $table) {
-            //
+        Schema::table('direcciones_envio', function (Blueprint $table) {
+            $table->dropColumn('email');
         });
     }
 };

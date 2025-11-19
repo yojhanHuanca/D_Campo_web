@@ -53,7 +53,7 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <p class="text-muted mb-2 small text-uppercase fw-semibold">Pedidos Totales</p>
-                            <h3 class="fw-bold mb-0">0</h3>
+                            <h3 class="fw-bold mb-0">{{ ($totalPedidos) }}</h3>
                         </div>
                         <div class="bg-success bg-opacity-10 rounded p-3">
                             <i class="bi bi-cart-check text-success" style="font-size: 1.5rem;"></i>
@@ -73,7 +73,7 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <p class="text-muted mb-2 small text-uppercase fw-semibold">Pedidos Pendientes</p>
-                            <h3 class="fw-bold mb-0">0</h3>
+                            <h3 class="fw-bold mb-0">{{ $pedidosRecientes->count() }}</h3>
                         </div>
                         <div class="bg-warning bg-opacity-10 rounded p-3">
                             <i class="bi bi-clock-history text-warning" style="font-size: 1.5rem;"></i>
@@ -138,7 +138,7 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <p class="text-muted mb-2 small text-uppercase fw-semibold">Ingresos Totales</p>
-                            <h3 class="fw-bold mb-0">S/ 0.00</h3>
+                            <h3 class="fw-bold mb-0">S/ {{ number_format($ingresosTotales, 2) }}</h3>
                         </div>
                         <div class="bg-success bg-opacity-10 rounded p-3">
                             <i class="bi bi-currency-dollar text-success" style="font-size: 1.5rem;"></i>
