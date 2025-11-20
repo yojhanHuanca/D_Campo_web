@@ -59,7 +59,7 @@
                             <i class="bi bi-cart-check text-success" style="font-size: 1.5rem;"></i>
                         </div>
                     </div>
-                    <a href="#" class="btn btn-sm btn-outline-success mt-3 w-100">
+                    <a href="{{ route('admin.pedidos.index') }}" class="btn btn-sm btn-outline-success mt-3 w-100">
                         <i class="bi bi-arrow-right-circle me-1"></i> Ver pedidos
                     </a>
                 </div>
@@ -164,7 +164,7 @@
                             <i class="bi bi-star-fill text-warning" style="font-size: 1.5rem;"></i>
                         </div>
                     </div>
-                    <a href="#" class="btn btn-sm btn-outline-warning mt-3 w-100">
+                    <a href="¨" class="btn btn-sm btn-outline-warning mt-3 w-100">
                         <i class="bi bi-chat-dots me-1"></i> Ver reseñas
                     </a>
                 </div>

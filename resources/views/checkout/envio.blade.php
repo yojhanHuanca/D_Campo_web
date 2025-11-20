@@ -191,6 +191,7 @@
 
                 </div>
             </div>
+            
 
             {{-- Resumen del pedido pequeño --}}
             <div class="card border-0 shadow-sm rounded-4 mt-4">

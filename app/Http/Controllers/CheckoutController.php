@@ -92,6 +92,86 @@ class CheckoutController extends Controller
         return view('checkout.pago', compact('items', 'subtotal', 'igv', 'envio', 'total'));
     }
 
+  public function procesarPago(Request $request)
+{
+    $request->validate([
+        'metodo_pago' => 'required',
+        'codigo_operacion' => 'nullable|string|max:50',
+        'comprobante' => 'nullable|image|mimes:jpg,jpeg,png|max:5000'
+    ]);
+
+    $user = Auth::user();
+
+    // Obtener dirección seleccionada
+    $direccionEnvioId = session('direccion_envio_id');
+
+    // Calcular total del carrito
+    $items = CartItem::where('user_id', $user->id)->with('producto')->get();
+    $subtotal = $items->sum(fn($item) => $item->producto->precio * $item->cantidad);
+    $igv = $subtotal * 0.18;
+    $envio = 10;
+    $total = $subtotal + $igv + $envio;
+
+    // Guardar comprobante si existe
+    $nombreComprobante = null;
+    if ($request->hasFile('comprobante')) {
+        $nombreComprobante = time() . '_' . $request->file('comprobante')->getClientOriginalName();
+        $request->file('comprobante')->storeAs('public/comprobantes', $nombreComprobante);
+    }
+
+    // Generar código de seguimiento
+    $codigoSeguimiento = 'DC-' . rand(100000, 999999);
+
+    // Crear registro de Pago (CÓDIGO CORREGIDO)
+    $pago = Pago::create([
+        'user_id' => $user->id,
+        'direccion_envio_id' => session('direccion_envio_id'),
+        'metodo_pago' => $request->metodo_pago,
+        'monto' => $total,
+        'estado' => $request->metodo_pago === 'tarjeta' ? 'pagado' : 'pendiente',
+        'codigo_operacion' => $request->codigo_operacion ?? null,
+        'numero_tarjeta' => $request->numero_tarjeta ?? null,
+        'nombre_titular' => $request->nombre_titular ?? null,
+        'vencimiento' => $request->vencimiento ?? null,
+        'cvv' => $request->cvv ?? null,
+        'comprobante' => $nombreComprobante, //
+    ]);
+
+    // Crear pedido
+    $pedido = Pedido::create([
+        'user_id' => $user->id,
+        'direccion_envio_id' => $direccionEnvioId,
+        'pago_id' => $pago->id,
+        'estado' => 'pendiente',
+        'total' => $total,
+        'metodo_pago' => $request->metodo_pago,
+        'codigo_operacion' => $request->codigo_operacion,
+        'comprobante' => $nombreComprobante,
+        'codigo_seguimiento' => $codigoSeguimiento,
+        'subtotal' => $subtotal,
+        'igv' => $igv,
+        'envio' => $envio
+    ]);
+
+    // Guardar items del pedido
+    foreach ($items as $item) {
+        PedidoItem::create([
+            'pedido_id' => $pedido->id,
+            'producto_id' => $item->producto->id,
+            'cantidad' => $item->cantidad,
+            'precio' => $item->producto->precio,
+        ]);
+    }
+
+    
+
+    // Guardar en sesión para el resumen
+    session(['pago_id' => $pago->id]);
+
+    return redirect()->route('checkout.resumen');
+}
+
+
     // ============================
     //   GUARDAR PAGO
     // ============================
@@ -142,9 +222,9 @@ class CheckoutController extends Controller
 
         // Guardar comprobante si existe
         $comprobantePath = null;
+
         if ($request->hasFile('comprobante')) {
             $comprobantePath = $request->file('comprobante')->store('comprobantes', 'public');
-        }
 
         // GUARDAR EN DB
         $pago = Pago::create([
@@ -174,7 +254,7 @@ class CheckoutController extends Controller
         return redirect()->route('checkout.resumen')
             ->with('success', 'Pago realizado correctamente.');
     }
-
+    }
     // RESUNEN DE PEDIDO
    public function resumen()
 {
@@ -237,11 +317,14 @@ class CheckoutController extends Controller
         $cartItems = CartItem::with('producto')
             ->where('user_id', $user->id)
             ->get();
-    
+        
+            // Validación
         if ($cartItems->isEmpty()) {
             return redirect()->route('cart.index')
                 ->with('error', 'Tu carrito está vacío.');
         }
+    
+        
     
         // 3. Calcular montos
         $subtotal = $cartItems->sum(fn($item) => $item->producto->precio * $item->cantidad);
@@ -262,7 +345,7 @@ class CheckoutController extends Controller
             'igv' => $igv,
             'envio' => $envio,
             'total' => $total,
-            'estado' => 'pagado'
+            'estado' => 'pendiente'
         ]);
     
         // 6. Guardar items del pedido

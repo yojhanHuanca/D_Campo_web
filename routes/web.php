@@ -6,9 +6,12 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CategoriaController;
 use App\Http\Controllers\Admin\ProductoController;
+use App\Http\Controllers\Admin\PedidoAdminController;
+use App\Http\Controllers\Admin\ResenaAdminController;
+use App\Http\Controllers\ResenaController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\StoreController;
-use App\Http\Controllers\ContactoController; // <-- recomendado
+use App\Http\Controllers\ContactoController; 
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\PedidoController;
@@ -55,6 +58,25 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/productos/{id}/editar', [ProductoController::class, 'edit'])->name('admin.productos.edit');
     Route::put('/admin/productos/{id}', [ProductoController::class, 'update'])->name('admin.productos.update');
     Route::delete('/admin/productos/{id}', [ProductoController::class, 'destroy'])->name('admin.productos.destroy');
+
+    // PEDIDOS
+    Route::get('/admin/pedidos', [PedidoAdminController::class, 'index'])
+        ->name('admin.pedidos.index');
+
+    Route::get('/admin/pedidos/{id}', [PedidoAdminController::class, 'show'])
+        ->name('admin.pedidos.show');
+    
+    Route::post('/admin/pedidos/{id}/estado', [PedidoAdminController::class, 'cambiarEstado'])
+        ->name('admin.pedidos.cambiarEstado');
+
+    // Reseñas
+
+    // RESEÑAS
+    Route::get('/admin/resenas', [ResenaAdminController::class, 'index'])->name('admin.resenas.index');
+    Route::get('/admin/resenas/{id}', [ResenaAdminController::class, 'show'])->name('admin.resenas.show');
+    Route::post('/admin/resenas/{id}/aprobar', [ResenaAdminController::class, 'aprobar'])->name('admin.resenas.aprobar');
+    Route::delete('/admin/resenas/{id}', [ResenaAdminController::class, 'eliminar'])->name('admin.resenas.eliminar');
+
 });
 
 
@@ -64,12 +86,20 @@ Route::middleware('auth')->group(function () {
     Route::post('/carrito/agregar', [CartController::class, 'add'])->name('cart.add');
     Route::post('/carrito/actualizar', [CartController::class, 'update'])->name('cart.update');
     Route::post('/carrito/eliminar', [CartController::class, 'remove'])->name('cart.remove');
+    
 });
 
 
 // TIENDA
 Route::get('/tienda', [StoreController::class, 'index'])->name('store.index');
 Route::get('/producto/{id}', [StoreController::class, 'show'])->name('store.show');
+// Guardar una reseña
+Route::post('/producto/{productoId}/resena', [ResenaController::class, 'store'])
+    ->middleware('auth')
+    ->name('resenas.store');
+Route::post('/resenas/{id}/reportar', [ResenaController::class, 'reportar'])
+    ->name('resenas.reportar');
+
 
 
 // NOSOTROS
@@ -107,6 +137,10 @@ Route::middleware('auth')->group(function () {
         ->name('checkout.pago');
 
      Route::post('/checkout/pago', [CheckoutController::class, 'guardarPago'])
+        ->name('checkout.pago.submit');
+
+    //Prosesar pago
+    Route::post('/checkout/pago', [CheckoutController::class, 'procesarPago'])
         ->name('checkout.pago.submit');
 
     // CHECKOUT - RESUMEN

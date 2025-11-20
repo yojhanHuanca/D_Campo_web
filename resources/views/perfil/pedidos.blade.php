@@ -51,11 +51,26 @@
                                 </small>
                             </div>
 
-                            {{-- Badge de Estado --}}
-                            <span class="badge bg-warning text-dark rounded-pill px-3 py-1">
-                                <i class="bi bi-hourglass-split me-1"></i>
-                                {{ ucfirst($pedido->estado) }}
-                            </span>
+                            {{-- Badge dinámico de estado --}}
+                            @php
+                                $estados = [
+                                'pendiente'   => ['color' => 'warning', 'icon' => 'hourglass-split'],
+                                'pagado'      => ['color' => 'info',    'icon' => 'credit-card'],
+                                'empaquetado' => ['color' => 'primary', 'icon' => 'box-seam'],
+                                'en_transito' => ['color' => 'secondary','icon' => 'truck'],
+                                'entregado'   => ['color' => 'success', 'icon' => 'check-circle'],
+                                'cancelado'   => ['color' => 'danger',  'icon' => 'x-circle'],
+                            ];
+
+                                $estado = $pedido->estado;
+                                $color = $estados[$estado]['color'] ?? 'secondary';
+                                 $icono = $estados[$estado]['icon'] ?? 'question-circle';
+                            @endphp
+
+                               <span class="badge bg-{{ $color }} text-white rounded-pill px-3 py-1">
+                                  <i class="bi bi-{{ $icono }} me-1"></i>
+                           {{ ucfirst(str_replace('_', ' ', $estado)) }}
+                             </span>
                         </div>
 
                         {{-- Lista de Productos --}}

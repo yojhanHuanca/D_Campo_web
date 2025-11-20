@@ -66,13 +66,13 @@
                     <span>Productos</span>
                 </a>
 
-                <a href="#" 
+                <a href="{{ route('admin.pedidos.index') }}" 
                    class="d-flex align-items-center text-decoration-none text-dark px-3 py-2 rounded mb-1 hover-item">
                     <i class="bi bi-cart-check me-3"></i>
                     <span>Pedidos</span>
                 </a>
 
-                <a href="#" 
+                <a href="{{ route('admin.resenas.index') }}" 
                    class="d-flex align-items-center text-decoration-none text-dark px-3 py-2 rounded mb-1 hover-item">
                     <i class="bi bi-star me-3"></i>
                     <span>Reseñas</span>

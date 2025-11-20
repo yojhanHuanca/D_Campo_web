@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('pagos', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('direccion_envio_id');
+            $table->unsignedBigInteger('direccion_envio_id')->nullable();
+            $table->foreign('direccion_envio_id')->references('id')->on('direcciones_envio');
             $table->string('metodo_pago'); // tarjeta, yape, plin, transferencia
             $table->decimal('monto', 10, 2);
             $table->string('estado')->default('pendiente'); // pendiente / pagado

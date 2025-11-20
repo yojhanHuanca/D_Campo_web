@@ -76,19 +76,32 @@
                     </div>
                 </div>
 
-                <div class="col-md-6">
-                    <div class="p-3 rounded-4 border" style="background:#fff8e6;">
-                        <small class="text-muted d-block mb-1">Estado del pedido</small>
-                        <span class="badge rounded-pill 
-                            @if($pedido->estado === 'pendiente') bg-warning text-dark
-                            @elseif($pedido->estado === 'pagado') bg-success
-                            @elseif($pedido->estado === 'enviado') bg-info
-                            @elseif($pedido->estado === 'entregado') bg-primary
-                            @else bg-danger @endif">
-                            {{ ucfirst($pedido->estado) }}
-                        </span>
-                    </div>
-                </div>
+                {{-- Estado del pedido --}}
+<div class="col-md-6">
+    <div class="p-3 rounded-4 border" style="background:#fff8e6;">
+        <small class="text-muted d-block mb-1">Estado del pedido</small>
+
+        @php
+            $estados = [
+                'pendiente'   => ['color' => 'warning text-dark', 'icon' => 'hourglass-split'],
+                'pagado'      => ['color' => 'info',             'icon' => 'credit-card'],
+                'empaquetado' => ['color' => 'primary',          'icon' => 'box-seam'],
+                'en_transito' => ['color' => 'secondary',        'icon' => 'truck'],
+                'entregado'   => ['color' => 'success',          'icon' => 'check-circle'],
+                'cancelado'   => ['color' => 'danger',           'icon' => 'x-circle'],
+            ];
+
+            $estado = $pedido->estado;
+            $color = $estados[$estado]['color'] ?? 'secondary';
+            $icono = $estados[$estado]['icon'] ?? 'question-circle';
+        @endphp
+
+        <span class="badge rounded-pill bg-{{ $color }} px-3 py-2">
+            <i class="bi bi-{{ $icono }} me-1"></i>
+            {{ ucfirst(str_replace('_', ' ', $estado)) }}
+        </span>
+    </div>
+</div>
 
             </div>
 
