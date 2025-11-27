@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Categoria;
 use App\Models\Producto;
 use App\Models\Pedido;
+use App\Models\Resena;
+
 
 class DashboardController extends Controller
 {
@@ -24,6 +26,14 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        $total = Resena::count();
+        $reportadas = Resena::where('estado', 'reportada')->count();
+        
+        $reseñasRecientes = Resena::with(['usuario'])
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
         
 
         return view('admin.dashboard', compact(
@@ -32,7 +42,10 @@ class DashboardController extends Controller
             'totalPedidos',
             'pedidosPendientes',
             'ingresosTotales',
-            'pedidosRecientes'
+            'pedidosRecientes',
+            'total', 
+            'reportadas',
+            'reseñasRecientes'
         ));
 
     }

@@ -70,7 +70,10 @@
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <p class="text-muted small mb-2">Promedio</p>
-                    <h4 class="fw-bold text-warning mb-0">{{ number_format($promedio, 1) }} ⭐</h4>
+                    <h4 class="fw-bold mb-0 d-flex align-items-center gap-1">
+                        {{ number_format($promedio, 1) }}
+                        <i class="bi bi-star-fill text-warning"></i>
+                    </h4>
                 </div>
             </div>
         </div>
@@ -78,18 +81,35 @@
 
     {{-- TABS --}}
     <ul class="nav nav-tabs mb-3">
+    
         <li class="nav-item">
-            <a class="nav-link active" href="#">Todas ({{ $total }})</a>
+            <a class="nav-link {{ !$estado ? 'active' : '' }}"
+               href="{{ route('admin.resenas.index') }}">
+                Todas ({{ $total }})
+            </a>
         </li>
+    
         <li class="nav-item">
-            <a class="nav-link" href="#">Reportadas ({{ $reportadas }})</a>
+            <a class="nav-link {{ $estado === 'reportada' ? 'active' : '' }}"
+               href="{{ route('admin.resenas.index', ['estado' => 'reportada']) }}">
+                Reportadas ({{ $reportadas }})
+            </a>
         </li>
+    
         <li class="nav-item">
-            <a class="nav-link" href="#">Aprobadas ({{ $aprobadas }})</a>
+            <a class="nav-link {{ $estado === 'aprobada' ? 'active' : '' }}"
+               href="{{ route('admin.resenas.index', ['estado' => 'aprobada']) }}">
+                Aprobadas ({{ $aprobadas }})
+            </a>
         </li>
+    
         <li class="nav-item">
-            <a class="nav-link" href="#">Pendientes (1)</a>
+            <a class="nav-link {{ $estado === 'pendiente' ? 'active' : '' }}"
+               href="{{ route('admin.resenas.index', ['estado' => 'pendiente']) }}">
+                Pendientes ({{ $pendientes }})
+            </a>
         </li>
+    
     </ul>
 
     {{-- LISTADO CON SCROLL --}}
@@ -104,9 +124,11 @@
                         <div class="flex-grow-1">
                             <div class="d-flex align-items-center gap-2 mb-1">
                                 <h6 class="fw-bold mb-0">{{ $resena->usuario->name }}</h6>
-                                <span>
+                    
+                                {{-- Estrellas (listado) --}}
+                                <span class="d-flex align-items-center" style="font-size: 14px;">
                                     @for ($i = 1; $i <= 5; $i++)
-                                        @if($i <= $resena->calificacion)
+                                        @if($i <= $resena->puntuacion)
                                             <span class="text-warning">★</span>
                                         @else
                                             <span class="text-muted">☆</span>
@@ -122,17 +144,23 @@
                                 {{ $resena->created_at->locale('es')->translatedFormat('d \d\e F \d\e Y') }}
                             </p>
                         </div>
-
                         {{-- Badge de estado --}}
                         @if($resena->estado === 'aprobada')
                             <span class="badge bg-success-subtle text-success border border-success rounded-pill px-3 py-2">
                                 <i class="bi bi-check-circle me-1"></i>Aprobada
                             </span>
+                        
                         @elseif($resena->estado === 'reportada')
                             <span class="badge bg-danger-subtle text-danger border border-danger rounded-pill px-3 py-2">
                                 <i class="bi bi-exclamation-triangle me-1"></i>Reportada
                             </span>
+                        
+                        @elseif($resena->estado === 'pendiente')
+                            <span class="badge bg-warning-subtle text-warning border border-warning rounded-pill px-3 py-2">
+                                <i class="bi bi-hourglass-split me-1"></i>Pendiente
+                            </span>
                         @endif
+
                     </div>
 
                     {{-- Comentario --}}
@@ -149,19 +177,20 @@
                         </div>
                     @endif
 
+            
                     {{-- BOTONES --}}
                     <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-
+                    
                         {{-- Ver detalles --}}
                         <a href="{{ route('admin.resenas.show', $resena->id) }}"
                            class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1">
                             <i class="bi bi-eye"></i>
                             <span>Ver detalles</span>
                         </a>
-
+                    
                         <div class="d-flex gap-2">
-
-                            {{-- Aprobar --}}
+                    
+                            {{-- Aprobar si está reportada --}}
                             @if($resena->estado === 'reportada')
                                 <form action="{{ route('admin.resenas.aprobar', $resena->id) }}" 
                                       method="POST" 
@@ -173,7 +202,20 @@
                                     </button>
                                 </form>
                             @endif
-
+                    
+                            {{-- Aprobar si está pendiente --}}
+                            @if($resena->estado === 'pendiente')
+                                <form action="{{ route('admin.resenas.aprobar', $resena->id) }}" 
+                                      method="POST" 
+                                      class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success btn-sm d-flex align-items-center gap-1">
+                                        <i class="bi bi-check-circle"></i>
+                                        <span>Aprobar</span>
+                                    </button>
+                                </form>
+                            @endif
+                    
                             {{-- Eliminar --}}
                             <form action="{{ route('admin.resenas.eliminar', $resena->id) }}" 
                                   method="POST" 
@@ -186,16 +228,13 @@
                                     <span>Eliminar</span>
                                 </button>
                             </form>
+                    
                         </div>
-
                     </div>
-
                 </div>
             </div>
         @endforeach
-
     </div>
-
 </div>
 
 @endsection

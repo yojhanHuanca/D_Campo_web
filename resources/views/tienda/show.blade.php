@@ -1,195 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ $producto->nombre }} - D'Campo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-light">
 
+<div class="container py-4">
 
-@section('content')
-<div class="container py-5">
+    {{-- Breadcrumb --}}
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('store.index') }}" class="text-decoration-none"><i class="bi bi-house-door me-1"></i>Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('store.index') }}" class="text-decoration-none">Productos</a></li>
+            <li class="breadcrumb-item active">{{ $producto->nombre }}</li>
+        </ol>
+    </nav>
 
-    {{-- Navegación superior --}}
-    <div class="mb-4">
-        <a href="{{ route('store.index') }}" class="btn btn-link text-decoration-none text-secondary p-0 mb-3">
-            <i class="bi bi-arrow-left me-2"></i>Volver a la tienda
-        </a>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">Inicio</a></li>
-                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">Tienda</a></li>
-                <li class="breadcrumb-item active">{{ $producto->categoria->nombre ?? 'Cosmética' }}</li>
-            </ol>
-        </nav>
-    </div>
-
-    {{-- Sección principal --}}
-    <div class="row g-5 mb-5">
-        {{-- Columna de imágenes --}}
+    {{-- Contenido Principal --}}
+    <div class="row g-4 mb-4">
+        
+        {{-- Columna Izquierda: Imagen --}}
         <div class="col-lg-5">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-4">
-                    @if($producto->imagen)
-                        <img src="{{ asset('storage/' . $producto->imagen) }}" class="img-fluid rounded mb-3" alt="{{ $producto->nombre }}">
-                    @else
-                        <div class="bg-light border rounded mb-3 d-flex align-items-center justify-content-center" style="height:400px;">
-                            <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
-                        </div>
-                    @endif
-                    
-                    {{-- Miniaturas --}}
-                    <div class="d-flex gap-2">
-                        @for($i = 0; $i < 4; $i++)
-                            <div class="border rounded overflow-hidden" style="width:80px;height:80px;">
-                                @if($i == 0 && $producto->imagen)
-                                    <img src="{{ asset('storage/' . $producto->imagen) }}" class="img-fluid" alt="thumb">
-                                @else
-                                    <div class="bg-light h-100 d-flex align-items-center justify-content-center">
-                                        <i class="bi bi-image text-muted"></i>
-                                    </div>
-                                @endif
-                            </div>
-                        @endfor
+            <div class="card border-0 shadow-sm mb-3">
+                @if($producto->imagen)
+                    <img src="{{ asset('storage/' . $producto->imagen) }}" class="card-img-top rounded" alt="{{ $producto->nombre }}" style="height: 450px; object-fit: cover;">
+                @else
+                    <div class="bg-light d-flex align-items-center justify-content-center rounded" style="height: 450px;">
+                        <i class="bi bi-image text-muted display-1"></i>
                     </div>
-                </div>
+                @endif
+            </div>
+            
+            <div class="row g-2">
+                @for($i = 0; $i < 3; $i++)
+                    <div class="col-3">
+                        <div class="card border shadow-sm" style="height: 90px; overflow: hidden;">
+                            @if($i == 0 && $producto->imagen)
+                                <img src="{{ asset('storage/' . $producto->imagen) }}" class="card-img h-100" style="object-fit: cover;" alt="thumb">
+                            @else
+                                <div class="card-body d-flex align-items-center justify-content-center bg-light h-100 p-0">
+                                    <i class="bi bi-image text-muted"></i>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endfor
             </div>
         </div>
 
-        {{-- Columna de información --}}
+        {{-- Columna Derecha: Info --}}
         <div class="col-lg-7">
-            <h1 class="display-5 fw-bold mb-3">{{ $producto->nombre }}</h1>
             
-            {{-- Rating --}}
-            <div class="d-flex align-items-center gap-3 mb-4">
+            <h1 class="h2 fw-bold mb-3">{{ $producto->nombre }}</h1>
+            
+            @php
+                $promedio = $producto->resenas->avg('puntuacion') ?? 0;
+                $totalResenas = $producto->resenas->count();
+            @endphp
+            
+            <div class="d-flex align-items-center gap-2 mb-3">
                 <div class="text-warning">
                     @for($i = 0; $i < 5; $i++)
-                        @if($i < round($producto->promedio()))
-                            <i class="bi bi-star-fill"></i>
-                        @else
-                            <i class="bi bi-star"></i>
-                        @endif
+                        <i class="bi bi-star{{ $i < round($promedio) ? '-fill' : '' }}"></i>
                     @endfor
                 </div>
-                <span class="text-muted">{{ number_format($producto->promedio(), 1) }} ({{ $producto->resenas->count() }} reseñas)</span>
+                <span class="text-muted">{{ number_format($promedio, 1) }}</span>
+                <a href="#seccion-resenas" class="text-decoration-none small">({{ $totalResenas }} opiniones)</a>
             </div>
 
-            <p class="lead text-muted mb-4">{{ $producto->descripcion }}</p>
+            <p class="text-muted mb-4">{{ $producto->descripcion }}</p>
 
-            <h2 class="display-4 text-success fw-bold mb-4">S/ {{ number_format($producto->precio, 2) }}</h2>
-
-            {{-- Ingredientes destacados --}}
-            <div class="mb-4">
-                <h6 class="fw-bold mb-3">
-                    <i class="bi bi-droplet text-primary me-2"></i>Ingredientes clave
-                </h6>
-                <div class="d-flex flex-wrap gap-2">
-                    <span class="badge bg-light text-dark border px-3 py-2">
-                        <i class="bi bi-flower1 text-success me-1"></i>Palta
-                    </span>
-                    <span class="badge bg-light text-dark border px-3 py-2">
-                        <i class="bi bi-moisture text-info me-1"></i>Ácido Hialurónico
-                    </span>
-                    <span class="badge bg-light text-dark border px-3 py-2">
-                        <i class="bi bi-brightness-high text-warning me-1"></i>Vitamina C
-                    </span>
+            <div class="card bg-success bg-opacity-10 border-0 mb-4">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <small class="text-muted">Precio</small>
+                            <h3 class="text-success fw-bold mb-0">S/ {{ number_format($producto->precio, 2) }}</h3>
+                        </div>
+                        <span class="badge bg-success">
+                            <i class="bi bi-truck me-1"></i>Envío gratis +S/150
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            {{-- Formulario --}}
-            <form action="{{ route('cart.add') }}" method="POST">
+            <form action="{{ route('cart.add') }}" method="POST" class="mb-4">
                 @csrf
                 <input type="hidden" name="product_id" value="{{ $producto->id }}">
 
-                <div class="row g-3 mb-4">
+                <div class="row g-3 mb-3">
                     <div class="col-md-4">
-                        <label class="form-label fw-semibold">Cantidad</label>
-                        <div class="input-group input-group-lg">
-                            <button class="btn btn-outline-secondary" type="button" onclick="decreaseQty()">
+                        <label class="form-label fw-semibold small">Cantidad</label>
+                        <div class="input-group">
+                            <button class="btn btn-outline-secondary" type="button" onclick="let input=this.nextElementSibling; if(input.value>1) input.value=parseInt(input.value)-1;">
                                 <i class="bi bi-dash"></i>
                             </button>
-                            <input type="number" id="cantidad" name="cantidad" value="1" min="1" max="{{ $producto->stock ?? 99 }}" class="form-control text-center">
-                            <button class="btn btn-outline-secondary" type="button" onclick="increaseQty()">
+                            <input type="number" name="cantidad" value="1" min="1" max="{{ $producto->stock ?? 99 }}" class="form-control text-center">
+                            <button class="btn btn-outline-secondary" type="button" onclick="let input=this.previousElementSibling; if(input.value<input.max) input.value=parseInt(input.value)+1;">
                                 <i class="bi bi-plus"></i>
                             </button>
                         </div>
                     </div>
+
                     <div class="col-md-8">
-                        <label class="form-label fw-semibold d-block">&nbsp;</label>
-                        <button type="submit" class="btn btn-success btn-lg w-100">
-                            <i class="bi bi-cart-plus me-2"></i>Agregar al carrito
-                        </button>
+                        <label class="form-label fw-semibold small">Disponibilidad</label>
+                        <div class="p-2 bg-light rounded border">
+                            <i class="bi bi-check-circle-fill text-success me-1"></i>
+                            <span class="small">En stock ({{ $producto->stock ?? 99 }} unidades)</span>
+                        </div>
                     </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="bi bi-cart-plus me-2"></i>Agregar al carrito
+                    </button>
+                    <button type="button"
+                            class="btn btn-outline-success btn-sm toggle-fav"
+                            data-url="{{ route('favorito.toggle', $producto->id) }}">
+                        <i class="bi bi-heart me-2"></i>Agregar a favoritos
+                    </button>
                 </div>
             </form>
 
-            {{-- Beneficios --}}
-            <div class="card border-0 bg-light mb-4">
-                <div class="card-body p-4">
-                    <h6 class="fw-bold mb-3">
-                        <i class="bi bi-stars text-warning me-2"></i>Beneficios principales
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body p-3">
+                    <h6 class="fw-bold mb-3 small">
+                        <i class="bi bi-check-circle text-success me-1"></i>Beneficios principales
                     </h6>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-start mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
-                                <span class="small">Rejuvenece la piel visiblemente</span>
-                            </div>
-                            <div class="d-flex align-items-start mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
-                                <span class="small">Reduce manchas y marcas</span>
-                            </div>
-                            <div class="d-flex align-items-start">
-                                <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
-                                <span class="small">Aumenta la producción de colágeno</span>
-                            </div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <small><i class="bi bi-check2 text-success me-1"></i>Rejuvenece la piel</small>
                         </div>
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-start mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
-                                <span class="small">Ilumina el rostro</span>
-                            </div>
-                            <div class="d-flex align-items-start mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
-                                <span class="small">Textura ligera de rápida absorción</span>
-                            </div>
-                            <div class="d-flex align-items-start">
-                                <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
-                                <span class="small">Unifica el tono de la piel</span>
-                            </div>
+                        <div class="col-6">
+                            <small><i class="bi bi-check2 text-success me-1"></i>Ilumina el rostro</small>
+                        </div>
+                        <div class="col-6">
+                            <small><i class="bi bi-check2 text-success me-1"></i>Reduce manchas</small>
+                        </div>
+                        <div class="col-6">
+                            <small><i class="bi bi-check2 text-success me-1"></i>Rápida absorción</small>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Garantías --}}
-            <div class="row g-3">
-                <div class="col-6 col-md-3">
-                    <div class="card border-0 shadow-sm h-100">
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="card border-0 bg-light">
                         <div class="card-body text-center p-3">
-                            <i class="bi bi-truck text-primary fs-3 mb-2"></i>
-                            <p class="small fw-semibold mb-1">Envío gratis</p>
-                            <p class="small text-muted mb-0">+S/ 150</p>
+                            <i class="bi bi-shield-check text-success fs-4"></i>
+                            <p class="small mb-0 mt-1">Compra Segura</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-6 col-md-3">
-                    <div class="card border-0 shadow-sm h-100">
+                <div class="col-6">
+                    <div class="card border-0 bg-light">
                         <div class="card-body text-center p-3">
-                            <i class="bi bi-shield-check text-success fs-3 mb-2"></i>
-                            <p class="small fw-semibold mb-1">Seguro</p>
-                            <p class="small text-muted mb-0">100%</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body text-center p-3">
-                            <i class="bi bi-arrow-counterclockwise text-info fs-3 mb-2"></i>
-                            <p class="small fw-semibold mb-1">Devolución</p>
-                            <p class="small text-muted mb-0">30 días</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body text-center p-3">
-                            <i class="bi bi-flower1 text-success fs-3 mb-2"></i>
-                            <p class="small fw-semibold mb-1">Natural</p>
-                            <p class="small text-muted mb-0">Orgánico</p>
+                            <i class="bi bi-arrow-repeat text-success fs-4"></i>
+                            <p class="small mb-0 mt-1">Devolución 30d</p>
                         </div>
                     </div>
                 </div>
@@ -197,23 +170,23 @@
         </div>
     </div>
 
-    {{-- Tabs de información --}}
-    <div class="card border-0 shadow-sm mb-5">
-        <div class="card-header bg-white border-0 pt-4">
-            <ul class="nav nav-tabs border-0" role="tablist">
+    {{-- Tabs --}}
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white pt-3">
+            <ul class="nav nav-tabs card-header-tabs">
                 <li class="nav-item">
-                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#modo-uso">
-                        <i class="bi bi-droplet me-2"></i>Modo de Uso
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-descripcion">
+                        <i class="bi bi-file-text me-1"></i>Descripción
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#ingredientes">
-                        <i class="bi bi-clipboard2-data me-2"></i>Ingredientes
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-ingredientes">
+                        <i class="bi bi-droplet me-1"></i>Ingredientes
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#resenas">
-                        <i class="bi bi-star me-2"></i>Reseñas ({{ $producto->resenas->count() }})
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-resenas">
+                        <i class="bi bi-star me-1"></i>Reseñas ({{ $totalResenas }})
                     </button>
                 </li>
             </ul>
@@ -221,126 +194,139 @@
 
         <div class="card-body p-4">
             <div class="tab-content">
-                {{-- TAB 1: Modo de Uso --}}
-                <div class="tab-pane fade show active" id="modo-uso">
-                    <h5 class="fw-bold mb-4">¿Cómo usar este producto?</h5>
-                    <p class="lead mb-4">Aplicar 3-4 gotas en rostro y cuello limpios. Usar mañana y noche antes de la crema hidratante.</p>
-                    <p>Dar ligeros golpecitos con los dedos para mejor absorción.</p>
+                
+                {{-- TAB Descripción --}}
+                <div class="tab-pane fade show active" id="tab-descripcion">
+                    <h5 class="fw-bold mb-3">Modo de uso</h5>
+                    <p class="mb-3">Aplicar 3-4 gotas en rostro y cuello limpios. Usar mañana y noche antes de la crema hidratante.</p>
                     
-                    <div class="card bg-light border-0 mt-4">
-                        <div class="card-body p-4">
-                            <h6 class="fw-bold mb-4">Certificaciones y Garantías</h6>
-                            <div class="row g-4">
-                                <div class="col-md-4">
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi bi-patch-check-fill text-success fs-3 me-3"></i>
-                                        <div>
-                                            <p class="fw-bold mb-0">100% Orgánico</p>
-                                            <p class="small text-muted mb-0">Certificado</p>
-                                        </div>
-                                    </div>
+                    <div class="row g-3 mt-3">
+                        <div class="col-md-4">
+                            <div class="card border h-100">
+                                <div class="card-body text-center p-3">
+                                    <i class="bi bi-patch-check-fill text-success fs-2 mb-2"></i>
+                                    <h6 class="fw-bold small">100% Orgánico</h6>
+                                    <p class="small text-muted mb-0">Certificado</p>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi bi-heart-fill text-danger fs-3 me-3"></i>
-                                        <div>
-                                            <p class="fw-bold mb-0">Cruelty Free</p>
-                                            <p class="small text-muted mb-0">No testado</p>
-                                        </div>
-                                    </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border h-100">
+                                <div class="card-body text-center p-3">
+                                    <i class="bi bi-heart-fill text-danger fs-2 mb-2"></i>
+                                    <h6 class="fw-bold small">Cruelty Free</h6>
+                                    <p class="small text-muted mb-0">No testado</p>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi bi-shield-fill-check text-primary fs-3 me-3"></i>
-                                        <div>
-                                            <p class="fw-bold mb-0">Sin Parabenos</p>
-                                            <p class="small text-muted mb-0">Fórmula limpia</p>
-                                        </div>
-                                    </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border h-100">
+                                <div class="card-body text-center p-3">
+                                    <i class="bi bi-shield-fill-check text-primary fs-2 mb-2"></i>
+                                    <h6 class="fw-bold small">Sin Parabenos</h6>
+                                    <p class="small text-muted mb-0">Fórmula limpia</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- TAB 2: Ingredientes --}}
-                <div class="tab-pane fade" id="ingredientes">
-                    <h5 class="fw-bold mb-4">Lista completa de ingredientes (INCI)</h5>
-                    <p class="text-muted mb-4">Aqua, Persea Gratissima (Avocado) Extract*, Hyaluronic Acid, Ascorbic Acid (Vitamin C), Palmitoyl Tripeptide-5, Glycerin, Phenoxyethanol, Ethylhexylglycerin. *Ingrediente orgánico certificado.</p>
+                {{-- TAB Ingredientes --}}
+                <div class="tab-pane fade" id="tab-ingredientes">
+                    <h5 class="fw-bold mb-3">Ingredientes activos</h5>
+                    <p class="text-muted mb-4 small">Aqua, Persea Gratissima (Avocado) Extract*, Hyaluronic Acid, Ascorbic Acid (Vitamin C), Palmitoyl Tripeptide-5.</p>
 
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <div class="card border h-100">
-                                <div class="card-body">
-                                    <i class="bi bi-flower1 text-success fs-3 mb-3"></i>
-                                    <h6 class="fw-bold mb-2">Extracto de palta</h6>
-                                    <p class="small text-muted mb-0">Rico en vitaminas y antioxidantes para nutrir la piel.</p>
+                            <div class="card bg-light border-0">
+                                <div class="card-body p-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="rounded-circle bg-success bg-opacity-10 p-2 me-2">
+                                            <i class="bi bi-flower1 text-success fs-5"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-0 small">Extracto de Palta</h6>
+                                    </div>
+                                    <p class="small text-muted mb-0">Rico en vitaminas que nutren la piel.</p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="card border h-100">
-                                <div class="card-body">
-                                    <i class="bi bi-moisture text-info fs-3 mb-3"></i>
-                                    <h6 class="fw-bold mb-2">Ácido hialurónico</h6>
-                                    <p class="small text-muted mb-0">Hidratación profunda y efecto relleno.</p>
+                            <div class="card bg-light border-0">
+                                <div class="card-body p-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="rounded-circle bg-info bg-opacity-10 p-2 me-2">
+                                            <i class="bi bi-moisture text-info fs-5"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-0 small">Ácido Hialurónico</h6>
+                                    </div>
+                                    <p class="small text-muted mb-0">Hidratación profunda.</p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="card border h-100">
-                                <div class="card-body">
-                                    <i class="bi bi-brightness-high text-warning fs-3 mb-3"></i>
-                                    <h6 class="fw-bold mb-2">Vitamina C</h6>
-                                    <p class="small text-muted mb-0">Ilumina y unifica el tono de la piel.</p>
+                            <div class="card bg-light border-0">
+                                <div class="card-body p-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="rounded-circle bg-warning bg-opacity-10 p-2 me-2">
+                                            <i class="bi bi-brightness-high text-warning fs-5"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-0 small">Vitamina C</h6>
+                                    </div>
+                                    <p class="small text-muted mb-0">Ilumina y unifica el tono.</p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="card border h-100">
-                                <div class="card-body">
-                                    <i class="bi bi-stars text-primary fs-3 mb-3"></i>
-                                    <h6 class="fw-bold mb-2">Péptidos naturales</h6>
-                                    <p class="small text-muted mb-0">Estimulan la producción de colágeno.</p>
+                            <div class="card bg-light border-0">
+                                <div class="card-body p-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="rounded-circle bg-primary bg-opacity-10 p-2 me-2">
+                                            <i class="bi bi-stars text-primary fs-5"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-0 small">Péptidos</h6>
+                                    </div>
+                                    <p class="small text-muted mb-0">Estimulan el colágeno.</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- TAB 3: Reseñas --}}
-                <div class="tab-pane fade" id="resenas">
+                {{-- TAB Reseñas --}}
+                <div class="tab-pane fade" id="tab-resenas">
+                    <div id="seccion-resenas">
                     
                     {{-- Resumen --}}
-                    <div class="row g-4 mb-5">
+                    <div class="row g-3 mb-4">
                         <div class="col-md-4">
-                            <div class="card border-0 bg-light h-100">
-                                <div class="card-body text-center d-flex flex-column justify-content-center p-4">
-                                    <div class="display-1 fw-bold text-warning mb-2">{{ number_format($producto->promedio(), 1) }}</div>
-                                    <div class="text-warning fs-4 mb-3">
+                            <div class="card bg-success bg-opacity-10 border-0">
+                                <div class="card-body text-center p-4">
+                                    <div class="display-4 fw-bold text-success">{{ number_format($promedio, 1) }}</div>
+                                    <div class="text-warning fs-5 my-2">
                                         @for($i = 0; $i < 5; $i++)
-                                            @if($i < round($producto->promedio()))
-                                                <i class="bi bi-star-fill"></i>
-                                            @else
-                                                <i class="bi bi-star"></i>
-                                            @endif
+                                            <i class="bi bi-star{{ $i < round($promedio) ? '-fill' : '' }}"></i>
                                         @endfor
                                     </div>
-                                    <p class="text-muted mb-0">Basado en {{ $producto->resenas->count() }} reseñas</p>
+                                    <p class="small text-muted mb-0">{{ $totalResenas }} opiniones</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-md-8">
-                            <div class="card border-0 bg-light h-100">
-                                <div class="card-body p-4">
+                            <div class="card bg-light border-0">
+                                <div class="card-body p-3">
+                                    <h6 class="fw-bold mb-3 small">Distribución</h6>
                                     @for($i = 5; $i >= 1; $i--)
-                                        <div class="d-flex align-items-center mb-3">
-                                            <span class="me-3 small fw-semibold" style="min-width: 30px;">{{ $i }} <i class="bi bi-star-fill text-warning"></i></span>
-                                            <div class="progress flex-grow-1 me-3" style="height: 10px;">
-                                                <div class="progress-bar bg-warning" style="width: {{ $producto->porcentajeEstrellas($i) }}%"></div>
+                                        @php
+                                            $cant = $producto->resenas->where('puntuacion', $i)->count();
+                                            $porc = $totalResenas > 0 ? ($cant / $totalResenas) * 100 : 0;
+                                        @endphp
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="small me-2" style="min-width:45px;">{{ $i }} <i class="bi bi-star-fill text-warning"></i></span>
+                                            <div class="progress flex-grow-1 me-2" style="height:8px;">
+                                                <div class="progress-bar bg-warning" style="width:{{ $porc }}%"></div>
                                             </div>
-                                            <span class="small text-muted" style="min-width: 30px;">{{ $producto->cantidadEstrellas($i) }}</span>
+                                            <span class="small text-muted" style="min-width:30px;">{{ $cant }}</span>
                                         </div>
                                     @endfor
                                 </div>
@@ -348,736 +334,193 @@
                         </div>
                     </div>
 
-                    {{-- Formulario nueva reseña --}}
+                    {{-- Formulario --}}
                     @auth
-                        @if(!$producto->usuarioYaComento(auth()->id()))
-                            <div class="card border-0 bg-light mb-5">
-                                <div class="card-body p-4">
-                                    <h5 class="fw-bold mb-4">
-                                        <i class="bi bi-pencil-square me-2"></i>Escribe tu reseña
-                                    </h5>
-
+                        @php
+                            $yaComento = $producto->resenas->where('usuario_id', auth()->id())->first();
+                        @endphp
+                        @if(!$yaComento)
+                            <div class="card border-success mb-4">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0"><i class="bi bi-pencil me-1"></i>Escribe tu reseña</h6>
+                                </div>
+                                <div class="card-body p-3">
                                     <form action="{{ route('resenas.store', $producto->id) }}" method="POST">
                                         @csrf
-
-                                        <div class="row g-4">
+                                        <div class="row g-3">
                                             <div class="col-md-4">
-                                                <label class="form-label fw-semibold">Tu calificación</label>
-                                                <select name="puntuacion" class="form-select form-select-lg" required>
+                                                <label class="form-label fw-semibold small">Calificación</label>
+                                                <select name="puntuacion" class="form-select" required>
                                                     <option value="">Selecciona</option>
-                                                    <option value="5"><i class="bi bi-star-fill"></i> 5 - Excelente</option>
+                                                    <option value="5">5 - Excelente</option>
                                                     <option value="4">4 - Muy bueno</option>
                                                     <option value="3">3 - Bueno</option>
                                                     <option value="2">2 - Regular</option>
                                                     <option value="1">1 - Malo</option>
                                                 </select>
                                             </div>
-
                                             <div class="col-md-8">
-                                                <label class="form-label fw-semibold">Tu opinión</label>
-                                                <textarea name="comentario" rows="4" class="form-control form-control-lg" placeholder="Comparte tu experiencia con este producto..." required></textarea>
+                                                <label class="form-label fw-semibold small">Tu opinión</label>
+                                                <textarea name="comentario" rows="3" class="form-control" placeholder="Comparte tu experiencia..." required></textarea>
                                             </div>
                                         </div>
-
-                                        <div class="text-end mt-4">
-                                            <button type="submit" class="btn btn-success btn-lg px-5">
-                                                <i class="bi bi-send me-2"></i>Publicar reseña
+                                        <div class="text-end mt-3">
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="bi bi-send me-1"></i>Publicar
                                             </button>
                                         </div>
                                     </form>
                                 </div>
                             </div>
                         @else
-                            <div class="alert alert-success border-0 mb-5">
-                                <i class="bi bi-check-circle-fill me-2"></i>
-                                <strong>¡Gracias!</strong> Ya has dejado tu reseña para este producto.
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle me-1"></i>¡Gracias por tu opinión!
                             </div>
                         @endif
                     @else
-                        <div class="alert alert-warning border-0 mb-5">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                            <strong>Inicia sesión</strong> para compartir tu opinión. 
-                            <a href="{{ route('login') }}" class="alert-link fw-bold">Iniciar sesión aquí</a>
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            <a href="{{ route('login') }}" class="alert-link">Inicia sesión</a> para dejar tu reseña.
                         </div>
                     @endauth
 
-                    {{-- Lista de reseñas --}}
-                    <h5 class="fw-bold mb-4">
-                        <i class="bi bi-chat-left-quote me-2"></i>Lo que dicen nuestros clientes
-                    </h5>
-
-                    @forelse($producto->resenas as $resena)
-                        <div class="card border shadow-sm mb-3">
-                            <div class="card-body p-4">
-                                <div class="d-flex">
-                                    {{-- Avatar --}}
-                                    <div class="rounded-circle bg-gradient d-flex align-items-center justify-content-center text-white fw-bold me-3" 
-                                         style="width: 50px; height: 50px; flex-shrink: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                                        {{ strtoupper(substr($resena->usuario->name, 0, 1)) }}
-                                    </div>
-
-                                    <div class="flex-grow-1">
-                                        {{-- Header --}}
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <div>
-                                                <h6 class="fw-bold mb-1">{{ $resena->usuario->name }}</h6>
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <div class="text-warning">
-                                                        @for($i = 0; $i < 5; $i++)
-                                                            @if($i < $resena->puntuacion)
-                                                                <i class="bi bi-star-fill"></i>
-                                                            @else
-                                                                <i class="bi bi-star"></i>
-                                                            @endif
-                                                        @endfor
-                                                    </div>
-                                                    <small class="text-muted">{{ $resena->created_at->locale('es')->diffForHumans() }}</small>
-                                                </div>
-                                            </div>
-
-                                            {{-- Badge verificado --}}
-                                            <span class="badge bg-success-subtle text-success border border-success rounded-pill">
-                                                <i class="bi bi-patch-check-fill me-1"></i>Compra verificada
-                                            </span>
-                                        </div>
-
-                                        {{-- Comentario --}}
-                                        <p class="mb-3">{{ $resena->comentario }}</p>
-
-                                        {{-- Acciones --}}
-                                        <div class="d-flex gap-3">
-                                            <button class="btn btn-sm btn-outline-secondary">
-                                                <i class="bi bi-hand-thumbs-up me-1"></i>Útil (0)
-                                            </button>
-                                            
-                                            @auth
-                                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalReportar{{ $resena->id }}">
-                                                    <i class="bi bi-flag me-1"></i>Reportar
-                                                </button>
-                                            @endauth
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Modal Reportar --}}
-                        @auth
-                            <div class="modal fade" id="modalReportar{{ $resena->id }}" tabindex="-1">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content border-0 shadow">
-                                        <div class="modal-header border-0 pb-0">
-                                            <h5 class="modal-title fw-bold">
-                                                <i class="bi bi-flag-fill text-danger me-2"></i>Reportar reseña
-                                            </h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-
-                                        <form action="{{ route('resenas.reportar', $resena->id) }}" method="POST">
-                                            @csrf
-                                            <div class="modal-body p-4">
-                                                <p class="text-muted mb-3">¿Por qué deseas reportar esta reseña?</p>
-
-                                                <select class="form-select mb-3" id="motivoRapido{{ $resena->id }}"
-                                                        onchange="document.getElementById('motivoTexto{{ $resena->id }}').value = this.value;">
-                                                    <option value="">Seleccionar motivo</option>
-                                                    <option value="Contenido ofensivo o inapropiado">Contenido ofensivo o inapropiado</option>
-                                                    <option value="Lenguaje vulgar o discriminatorio">Lenguaje vulgar o discriminatorio</option>
-                                                    <option value="Información falsa o engañosa">Información falsa o engañosa</option>
-                                                    <option value="Spam o contenido publicitario">Spam o contenido publicitario</option>
-                                                    <option value="Acoso o intimidación">Acoso o intimidación</option>
-                                                </select>
-
-                                                <textarea id="motivoTexto{{ $resena->id }}"
-                                                          name="motivo"
-                                                          class="form-control"
-                                                          rows="4"
-                                                          placeholder="Describe con más detalle el motivo del reporte (opcional)"
-                                                          required></textarea>
-                                            </div>
-
-                                            <div class="modal-footer border-0">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                                    Cancelar
-                                                </button>
-                                                <button type="submit" class="btn btn-danger">
-                                                    <i class="bi bi-send me-1"></i>Enviar reporte
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        @endauth
-                    @empty
-                        <div class="text-center py-5">
-                            <i class="bi bi-chat-left-quote text-muted" style="font-size: 4rem;"></i>
-                            <p class="text-muted mt-3 mb-2">Aún no hay reseñas para este producto.</p>
-                            <p class="text-muted">¡Sé el primero en compartir tu opinión!</p>
-                        </div>
-                    @endforelse
-                </div>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<script>
-function increaseQty() {
-    let input = document.getElementById('cantidad');
-    let max = parseInt(input.getAttribute('max'));
-    if (parseInt(input.value) < max) {
-        input.value = parseInt(input.value) + 1;
-    }
-}
-
-function decreaseQty() {
-    let input = document.getElementById('cantidad');
-    if (parseInt(input.value) > 1) {
-        input.value = parseInt(input.value) - 1;
-    }
-}
-</script>
-@endsection@extends('layouts.app')
-
-@section('content')
-<div class="container py-5">
-
-    {{-- Navegación superior --}}
-    <div class="mb-4">
-        <a href="{{ route('store.index') }}" class="btn btn-link text-decoration-none text-secondary p-0 mb-3">
-            <i class="bi bi-arrow-left me-2"></i>Volver a la tienda
-        </a>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">Inicio</a></li>
-                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">Tienda</a></li>
-                <li class="breadcrumb-item active">{{ $producto->categoria->nombre ?? 'Cosmética' }}</li>
-            </ol>
-        </nav>
-    </div>
-
-    {{-- Sección principal --}}
-    <div class="row g-5 mb-5">
-        {{-- Columna de imágenes --}}
-        <div class="col-lg-5">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-4">
-                    @if($producto->imagen)
-                        <img src="{{ asset('storage/' . $producto->imagen) }}" class="img-fluid rounded mb-3" alt="{{ $producto->nombre }}">
-                    @else
-                        <div class="bg-light border rounded mb-3 d-flex align-items-center justify-content-center" style="height:400px;">
-                            <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
-                        </div>
-                    @endif
-                    
-                    {{-- Miniaturas --}}
-                    <div class="d-flex gap-2">
-                        @for($i = 0; $i < 4; $i++)
-                            <div class="border rounded overflow-hidden" style="width:80px;height:80px;">
-                                @if($i == 0 && $producto->imagen)
-                                    <img src="{{ asset('storage/' . $producto->imagen) }}" class="img-fluid" alt="thumb">
-                                @else
-                                    <div class="bg-light h-100 d-flex align-items-center justify-content-center">
-                                        <i class="bi bi-image text-muted"></i>
-                                    </div>
-                                @endif
-                            </div>
-                        @endfor
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Columna de información --}}
-        <div class="col-lg-7">
-            <h1 class="display-5 fw-bold mb-3">{{ $producto->nombre }}</h1>
-            
-            {{-- Rating --}}
-            <div class="d-flex align-items-center gap-3 mb-4">
-                <div class="text-warning">
-                    @for($i = 0; $i < 5; $i++)
-                        @if($i < round($producto->promedio()))
-                            <i class="bi bi-star-fill"></i>
-                        @else
-                            <i class="bi bi-star"></i>
-                        @endif
-                    @endfor
-                </div>
-                <span class="text-muted">{{ number_format($producto->promedio(), 1) }} ({{ $producto->resenas->count() }} reseñas)</span>
-            </div>
-
-            <p class="lead text-muted mb-4">{{ $producto->descripcion }}</p>
-
-            <h2 class="display-4 text-success fw-bold mb-4">S/ {{ number_format($producto->precio, 2) }}</h2>
-
-            {{-- Ingredientes destacados --}}
-            <div class="mb-4">
-                <h6 class="fw-bold mb-3">
-                    <i class="bi bi-droplet text-primary me-2"></i>Ingredientes clave
-                </h6>
-                <div class="d-flex flex-wrap gap-2">
-                    <span class="badge bg-light text-dark border px-3 py-2">
-                        <i class="bi bi-flower1 text-success me-1"></i>Palta
-                    </span>
-                    <span class="badge bg-light text-dark border px-3 py-2">
-                        <i class="bi bi-moisture text-info me-1"></i>Ácido Hialurónico
-                    </span>
-                    <span class="badge bg-light text-dark border px-3 py-2">
-                        <i class="bi bi-brightness-high text-warning me-1"></i>Vitamina C
-                    </span>
-                </div>
-            </div>
-
-            {{-- Formulario --}}
-            <form action="{{ route('cart.add') }}" method="POST">
-                @csrf
-                <input type="hidden" name="product_id" value="{{ $producto->id }}">
-
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Cantidad</label>
-                        <div class="input-group input-group-lg">
-                            <button class="btn btn-outline-secondary" type="button" onclick="decreaseQty()">
-                                <i class="bi bi-dash"></i>
-                            </button>
-                            <input type="number" id="cantidad" name="cantidad" value="1" min="1" max="{{ $producto->stock ?? 99 }}" class="form-control text-center">
-                            <button class="btn btn-outline-secondary" type="button" onclick="increaseQty()">
-                                <i class="bi bi-plus"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="col-md-8">
-                        <label class="form-label fw-semibold d-block">&nbsp;</label>
-                        <button type="submit" class="btn btn-success btn-lg w-100">
-                            <i class="bi bi-cart-plus me-2"></i>Agregar al carrito
-                        </button>
-                    </div>
-                </div>
-            </form>
-
-            {{-- Beneficios --}}
-            <div class="card border-0 bg-light mb-4">
-                <div class="card-body p-4">
+                    {{-- Lista --}}
                     <h6 class="fw-bold mb-3">
-                        <i class="bi bi-stars text-warning me-2"></i>Beneficios principales
+                        <i class="bi bi-chat-quote text-success me-1"></i>Opiniones verificadas
                     </h6>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-start mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
-                                <span class="small">Rejuvenece la piel visiblemente</span>
-                            </div>
-                            <div class="d-flex align-items-start mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
-                                <span class="small">Reduce manchas y marcas</span>
-                            </div>
-                            <div class="d-flex align-items-start">
-                                <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
-                                <span class="small">Aumenta la producción de colágeno</span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-start mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
-                                <span class="small">Ilumina el rostro</span>
-                            </div>
-                            <div class="d-flex align-items-start mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
-                                <span class="small">Textura ligera de rápida absorción</span>
-                            </div>
-                            <div class="d-flex align-items-start">
-                                <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
-                                <span class="small">Unifica el tono de la piel</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            {{-- Garantías --}}
-            <div class="row g-3">
-                <div class="col-6 col-md-3">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body text-center p-3">
-                            <i class="bi bi-truck text-primary fs-3 mb-2"></i>
-                            <p class="small fw-semibold mb-1">Envío gratis</p>
-                            <p class="small text-muted mb-0">+S/ 150</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body text-center p-3">
-                            <i class="bi bi-shield-check text-success fs-3 mb-2"></i>
-                            <p class="small fw-semibold mb-1">Seguro</p>
-                            <p class="small text-muted mb-0">100%</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body text-center p-3">
-                            <i class="bi bi-arrow-counterclockwise text-info fs-3 mb-2"></i>
-                            <p class="small fw-semibold mb-1">Devolución</p>
-                            <p class="small text-muted mb-0">30 días</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body text-center p-3">
-                            <i class="bi bi-flower1 text-success fs-3 mb-2"></i>
-                            <p class="small fw-semibold mb-1">Natural</p>
-                            <p class="small text-muted mb-0">Orgánico</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Tabs de información --}}
-    <div class="card border-0 shadow-sm mb-5">
-        <div class="card-header bg-white border-0 pt-4">
-            <ul class="nav nav-tabs border-0" role="tablist">
-                <li class="nav-item">
-                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#modo-uso">
-                        <i class="bi bi-droplet me-2"></i>Modo de Uso
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#ingredientes">
-                        <i class="bi bi-clipboard2-data me-2"></i>Ingredientes
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#resenas">
-                        <i class="bi bi-star me-2"></i>Reseñas ({{ $producto->resenas->count() }})
-                    </button>
-                </li>
-            </ul>
-        </div>
-
-        <div class="card-body p-4">
-            <div class="tab-content">
-                {{-- TAB 1: Modo de Uso --}}
-                <div class="tab-pane fade show active" id="modo-uso">
-                    <h5 class="fw-bold mb-4">¿Cómo usar este producto?</h5>
-                    <p class="lead mb-4">Aplicar 3-4 gotas en rostro y cuello limpios. Usar mañana y noche antes de la crema hidratante.</p>
-                    <p>Dar ligeros golpecitos con los dedos para mejor absorción.</p>
-                    
-                    <div class="card bg-light border-0 mt-4">
-                        <div class="card-body p-4">
-                            <h6 class="fw-bold mb-4">Certificaciones y Garantías</h6>
-                            <div class="row g-4">
-                                <div class="col-md-4">
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi bi-patch-check-fill text-success fs-3 me-3"></i>
-                                        <div>
-                                            <p class="fw-bold mb-0">100% Orgánico</p>
-                                            <p class="small text-muted mb-0">Certificado</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi bi-heart-fill text-danger fs-3 me-3"></i>
-                                        <div>
-                                            <p class="fw-bold mb-0">Cruelty Free</p>
-                                            <p class="small text-muted mb-0">No testado</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi bi-shield-fill-check text-primary fs-3 me-3"></i>
-                                        <div>
-                                            <p class="fw-bold mb-0">Sin Parabenos</p>
-                                            <p class="small text-muted mb-0">Fórmula limpia</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- TAB 2: Ingredientes --}}
-                <div class="tab-pane fade" id="ingredientes">
-                    <h5 class="fw-bold mb-4">Lista completa de ingredientes (INCI)</h5>
-                    <p class="text-muted mb-4">Aqua, Persea Gratissima (Avocado) Extract*, Hyaluronic Acid, Ascorbic Acid (Vitamin C), Palmitoyl Tripeptide-5, Glycerin, Phenoxyethanol, Ethylhexylglycerin. *Ingrediente orgánico certificado.</p>
-
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="card border h-100">
-                                <div class="card-body">
-                                    <i class="bi bi-flower1 text-success fs-3 mb-3"></i>
-                                    <h6 class="fw-bold mb-2">Extracto de palta</h6>
-                                    <p class="small text-muted mb-0">Rico en vitaminas y antioxidantes para nutrir la piel.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card border h-100">
-                                <div class="card-body">
-                                    <i class="bi bi-moisture text-info fs-3 mb-3"></i>
-                                    <h6 class="fw-bold mb-2">Ácido hialurónico</h6>
-                                    <p class="small text-muted mb-0">Hidratación profunda y efecto relleno.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card border h-100">
-                                <div class="card-body">
-                                    <i class="bi bi-brightness-high text-warning fs-3 mb-3"></i>
-                                    <h6 class="fw-bold mb-2">Vitamina C</h6>
-                                    <p class="small text-muted mb-0">Ilumina y unifica el tono de la piel.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card border h-100">
-                                <div class="card-body">
-                                    <i class="bi bi-stars text-primary fs-3 mb-3"></i>
-                                    <h6 class="fw-bold mb-2">Péptidos naturales</h6>
-                                    <p class="small text-muted mb-0">Estimulan la producción de colágeno.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- TAB 3: Reseñas --}}
-                <div class="tab-pane fade" id="resenas">
-                    
-                    {{-- Resumen --}}
-                    <div class="row g-4 mb-5">
-                        <div class="col-md-4">
-                            <div class="card border-0 bg-light h-100">
-                                <div class="card-body text-center d-flex flex-column justify-content-center p-4">
-                                    <div class="display-1 fw-bold text-warning mb-2">{{ number_format($producto->promedio(), 1) }}</div>
-                                    <div class="text-warning fs-4 mb-3">
-                                        @for($i = 0; $i < 5; $i++)
-                                            @if($i < round($producto->promedio()))
-                                                <i class="bi bi-star-fill"></i>
-                                            @else
-                                                <i class="bi bi-star"></i>
-                                            @endif
-                                        @endfor
-                                    </div>
-                                    <p class="text-muted mb-0">Basado en {{ $producto->resenas->count() }} reseñas</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-8">
-                            <div class="card border-0 bg-light h-100">
-                                <div class="card-body p-4">
-                                    @for($i = 5; $i >= 1; $i--)
-                                        <div class="d-flex align-items-center mb-3">
-                                            <span class="me-3 small fw-semibold" style="min-width: 30px;">{{ $i }} <i class="bi bi-star-fill text-warning"></i></span>
-                                            <div class="progress flex-grow-1 me-3" style="height: 10px;">
-                                                <div class="progress-bar bg-warning" style="width: {{ $producto->porcentajeEstrellas($i) }}%"></div>
-                                            </div>
-                                            <span class="small text-muted" style="min-width: 30px;">{{ $producto->cantidadEstrellas($i) }}</span>
-                                        </div>
-                                    @endfor
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Formulario nueva reseña --}}
-                    @auth
-                        @if(!$producto->usuarioYaComento(auth()->id()))
-                            <div class="card border-0 bg-light mb-5">
-                                <div class="card-body p-4">
-                                    <h5 class="fw-bold mb-4">
-                                        <i class="bi bi-pencil-square me-2"></i>Escribe tu reseña
-                                    </h5>
-
-                                    <form action="{{ route('resenas.store', $producto->id) }}" method="POST">
-                                        @csrf
-
-                                        <div class="row g-4">
-                                            <div class="col-md-4">
-                                                <label class="form-label fw-semibold">Tu calificación</label>
-                                                <select name="puntuacion" class="form-select form-select-lg" required>
-                                                    <option value="">Selecciona</option>
-                                                    <option value="5"><i class="bi bi-star-fill"></i> 5 - Excelente</option>
-                                                    <option value="4">4 - Muy bueno</option>
-                                                    <option value="3">3 - Bueno</option>
-                                                    <option value="2">2 - Regular</option>
-                                                    <option value="1">1 - Malo</option>
-                                                </select>
-                                            </div>
-
-                                            <div class="col-md-8">
-                                                <label class="form-label fw-semibold">Tu opinión</label>
-                                                <textarea name="comentario" rows="4" class="form-control form-control-lg" placeholder="Comparte tu experiencia con este producto..." required></textarea>
-                                            </div>
+                    <div style="max-height:600px; overflow-y:auto;">
+                        @forelse($producto->resenas as $resena)
+                            <div class="card border shadow-sm mb-3">
+                                <div class="card-body p-3">
+                                    <div class="d-flex">
+                                        <div class="rounded-circle bg-success d-flex align-items-center justify-content-center text-white fw-bold me-3" 
+                                             style="width:48px; height:48px; flex-shrink:0;">
+                                            {{ strtoupper(substr($resena->usuario->name, 0, 1)) }}
                                         </div>
 
-                                        <div class="text-end mt-4">
-                                            <button type="submit" class="btn btn-success btn-lg px-5">
-                                                <i class="bi bi-send me-2"></i>Publicar reseña
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        @else
-                            <div class="alert alert-success border-0 mb-5">
-                                <i class="bi bi-check-circle-fill me-2"></i>
-                                <strong>¡Gracias!</strong> Ya has dejado tu reseña para este producto.
-                            </div>
-                        @endif
-                    @else
-                        <div class="alert alert-warning border-0 mb-5">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                            <strong>Inicia sesión</strong> para compartir tu opinión. 
-                            <a href="{{ route('login') }}" class="alert-link fw-bold">Iniciar sesión aquí</a>
-                        </div>
-                    @endauth
-
-                    {{-- Lista de reseñas --}}
-                    <h5 class="fw-bold mb-4">
-                        <i class="bi bi-chat-left-quote me-2"></i>Lo que dicen nuestros clientes
-                    </h5>
-
-                    @forelse($producto->resenas as $resena)
-                        <div class="card border shadow-sm mb-3">
-                            <div class="card-body p-4">
-                                <div class="d-flex">
-                                    {{-- Avatar --}}
-                                    <div class="rounded-circle bg-gradient d-flex align-items-center justify-content-center text-white fw-bold me-3" 
-                                         style="width: 50px; height: 50px; flex-shrink: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                                        {{ strtoupper(substr($resena->usuario->name, 0, 1)) }}
-                                    </div>
-
-                                    <div class="flex-grow-1">
-                                        {{-- Header --}}
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <div>
-                                                <h6 class="fw-bold mb-1">{{ $resena->usuario->name }}</h6>
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <div class="text-warning">
-                                                        @for($i = 0; $i < 5; $i++)
-                                                            @if($i < $resena->puntuacion)
-                                                                <i class="bi bi-star-fill"></i>
-                                                            @else
-                                                                <i class="bi bi-star"></i>
-                                                            @endif
-                                                        @endfor
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <div>
+                                                    <h6 class="fw-bold mb-1 small">{{ $resena->usuario->name }}</h6>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div class="text-warning small">
+                                                            @for($i = 0; $i < 5; $i++)
+                                                                <i class="bi bi-star{{ $i < $resena->puntuacion ? '-fill' : '' }}"></i>
+                                                            @endfor
+                                                        </div>
+                                                        <span class="text-muted small">{{ $resena->created_at->diffForHumans() }}</span>
                                                     </div>
-                                                    <small class="text-muted">{{ $resena->created_at->locale('es')->diffForHumans() }}</small>
                                                 </div>
+                                                <span class="badge bg-success-subtle text-success border border-success small">
+                                                    <i class="bi bi-patch-check me-1"></i>Verificada
+                                                </span>
                                             </div>
 
-                                            {{-- Badge verificado --}}
-                                            <span class="badge bg-success-subtle text-success border border-success rounded-pill">
-                                                <i class="bi bi-patch-check-fill me-1"></i>Compra verificada
-                                            </span>
-                                        </div>
+                                            <p class="mb-2 small">{{ $resena->comentario }}</p>
 
-                                        {{-- Comentario --}}
-                                        <p class="mb-3">{{ $resena->comentario }}</p>
-
-                                        {{-- Acciones --}}
-                                        <div class="d-flex gap-3">
-                                            <button class="btn btn-sm btn-outline-secondary">
-                                                <i class="bi bi-hand-thumbs-up me-1"></i>Útil (0)
-                                            </button>
-                                            
-                                            @auth
-                                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalReportar{{ $resena->id }}">
-                                                    <i class="bi bi-flag me-1"></i>Reportar
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-sm btn-outline-secondary">
+                                                    <i class="bi bi-hand-thumbs-up me-1"></i>Útil
                                                 </button>
-                                            @endauth
+                                                
+                                                @auth
+                                                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modal{{ $resena->id }}">
+                                                        <i class="bi bi-flag me-1"></i>Reportar
+                                                    </button>
+                                                @endauth
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {{-- Modal Reportar --}}
-                        @auth
-                            <div class="modal fade" id="modalReportar{{ $resena->id }}" tabindex="-1">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content border-0 shadow">
-                                        <div class="modal-header border-0 pb-0">
-                                            <h5 class="modal-title fw-bold">
-                                                <i class="bi bi-flag-fill text-danger me-2"></i>Reportar reseña
-                                            </h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            {{-- Modal --}}
+                            @auth
+                                <div class="modal fade" id="modal{{ $resena->id }}" tabindex="-1">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-danger text-white">
+                                                <h6 class="modal-title"><i class="bi bi-flag me-1"></i>Reportar reseña</h6>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+
+                                            <form action="{{ route('resenas.reportar', $resena->id) }}" method="POST">
+                                                @csrf
+                                                <div class="modal-body">
+                                                    <p class="fw-semibold small">¿Por qué reportas esta reseña?</p>
+
+                                                    <select class="form-select mb-3" id="sel{{ $resena->id }}"
+                                                            onchange="document.getElementById('txt{{ $resena->id }}').value = this.value;">
+                                                        <option value="">Selecciona</option>
+                                                        <option value="Contenido ofensivo">Contenido ofensivo</option>
+                                                        <option value="Lenguaje inapropiado">Lenguaje inapropiado</option>
+                                                        <option value="Información falsa">Información falsa</option>
+                                                        <option value="Spam">Spam</option>
+                                                    </select>
+
+                                                    <textarea id="txt{{ $resena->id }}" name="motivo" class="form-control" rows="3" placeholder="Describe el motivo" required></textarea>
+                                                </div>
+
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                                                    <button type="submit" class="btn btn-danger btn-sm">
+                                                        <i class="bi bi-send me-1"></i>Enviar
+                                                    </button>
+                                                </div>
+                                            </form>
                                         </div>
-
-                                        <form action="{{ route('resenas.reportar', $resena->id) }}" method="POST">
-                                            @csrf
-                                            <div class="modal-body p-4">
-                                                <p class="text-muted mb-3">¿Por qué deseas reportar esta reseña?</p>
-
-                                                <select class="form-select mb-3" id="motivoRapido{{ $resena->id }}"
-                                                        onchange="document.getElementById('motivoTexto{{ $resena->id }}').value = this.value;">
-                                                    <option value="">Seleccionar motivo</option>
-                                                    <option value="Contenido ofensivo o inapropiado">Contenido ofensivo o inapropiado</option>
-                                                    <option value="Lenguaje vulgar o discriminatorio">Lenguaje vulgar o discriminatorio</option>
-                                                    <option value="Información falsa o engañosa">Información falsa o engañosa</option>
-                                                    <option value="Spam o contenido publicitario">Spam o contenido publicitario</option>
-                                                    <option value="Acoso o intimidación">Acoso o intimidación</option>
-                                                </select>
-
-                                                <textarea id="motivoTexto{{ $resena->id }}"
-                                                          name="motivo"
-                                                          class="form-control"
-                                                          rows="4"
-                                                          placeholder="Describe con más detalle el motivo del reporte (opcional)"
-                                                          required></textarea>
-                                            </div>
-
-                                            <div class="modal-footer border-0">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                                    Cancelar
-                                                </button>
-                                                <button type="submit" class="btn btn-danger">
-                                                    <i class="bi bi-send me-1"></i>Enviar reporte
-                                                </button>
-                                            </div>
-                                        </form>
                                     </div>
                                 </div>
+                            @endauth
+                        @empty
+                            <div class="text-center py-5">
+                                <i class="bi bi-chat-quote text-muted" style="font-size:4rem;"></i>
+                                <p class="text-muted mt-3">Aún no hay reseñas</p>
+                                <p class="text-muted small">¡Sé el primero en opinar!</p>
                             </div>
-                        @endauth
-                    @empty
-                        <div class="text-center py-5">
-                            <i class="bi bi-chat-left-quote text-muted" style="font-size: 4rem;"></i>
-                            <p class="text-muted mt-3 mb-2">Aún no hay reseñas para este producto.</p>
-                            <p class="text-muted">¡Sé el primero en compartir tu opinión!</p>
-                        </div>
-                    @endforelse
+                        @endforelse
+                    </div>
+                    
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
 </div>
-
 <script>
-function increaseQty() {
-    let input = document.getElementById('cantidad');
-    let max = parseInt(input.getAttribute('max'));
-    if (parseInt(input.value) < max) {
-        input.value = parseInt(input.value) + 1;
-    }
-}
+document.querySelectorAll('.toggle-fav').forEach(btn => {
 
-function decreaseQty() {
-    let input = document.getElementById('cantidad');
-    if (parseInt(input.value) > 1) {
-        input.value = parseInt(input.value) - 1;
-    }
-}
+    btn.addEventListener('click', () => {
+        let url = btn.dataset.url;  // 👉 usa la URL correcta que viene del data-url
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                "Accept": "application/json"
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.favorito === true) {
+                // Cambiar a agregado
+                btn.classList.remove('btn-outline-success');
+                btn.classList.add('btn-success');
+                btn.innerHTML = `<i class="bi bi-heart-fill me-2"></i> Favorito`;
+            } else {
+                // Cambiar a no agregado
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-outline-success');
+                btn.innerHTML = `<i class="bi bi-heart me-2"></i> Agregar a favoritos`;
+            }
+        });
+    });
+
+});
 </script>
-@endsection
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

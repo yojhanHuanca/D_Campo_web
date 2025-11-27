@@ -90,21 +90,31 @@
         </a>
 
         {{-- Favoritos --}}
-        <a href="#" class="list-group-item list-group-item-action d-flex align-items-center py-2">
+        @php
+            $totalFavoritos = Auth::user()->favoritos()->count();
+        @endphp
+        <a href="{{ route('perfil.favoritos') }}" 
+           class="list-group-item list-group-item-action d-flex align-items-center py-2">
             <i class="bi bi-heart-fill text-success me-2"></i>
-            <span class="fw-semibold" style="font-size: 0.85rem;">Favoritos</span>
-            <span class="badge bg-success rounded-pill ms-auto">{{ $totalFavoritos ?? 0 }}</span>
+            <span class="fw-semibold" style="font-size: 0.85rem;">
+                Favoritos
+            </span>
+            <span class="badge bg-success rounded-pill ms-auto">
+                {{ $totalFavoritos }}
+            </span>
         </a>
 
+
         {{-- Seguridad --}}
-        <a href="#" class="list-group-item list-group-item-action d-flex align-items-center py-2">
+        <a href="{{ route('perfil.seguridad') }}" 
+            class="list-group-item list-group-item-action d-flex align-items-center py-2">
             <i class="bi bi-lock-fill text-warning me-2"></i>
             <span class="fw-semibold" style="font-size: 0.85rem;">Seguridad</span>
             <i class="bi bi-shield-fill-check text-warning ms-auto"></i>
         </a>
 
         {{-- Asesoría --}}
-        <a href="#" class="list-group-item list-group-item-action d-flex align-items-center py-2">
+        <a href="{{ route('perfil.asesoria') }}" class="list-group-item list-group-item-action d-flex align-items-center py-2">
             <i class="bi bi-headset me-2"></i>
             <span class="fw-semibold" style="font-size: 0.85rem;">Asesoría</span>
             <i class="bi bi-chat-dots ms-auto"></i>

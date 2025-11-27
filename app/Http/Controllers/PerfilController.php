@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Pedido;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use App\Models\ConsultaSoporte;
 
 
 class PerfilController extends Controller
@@ -17,8 +19,8 @@ class PerfilController extends Controller
         // Cantidad de pedidos del usuario
         $totalPedidos = Pedido::where('user_id', $user->id)->count();
 
-        // Favoritos (si luego agregas tabla favoritos)
-        $totalFavoritos = 0;
+        // Favoritos 
+        $totalFavoritos = $user->favoritos()->count();
 
         return view('perfil.index', compact(
             'user',
@@ -54,4 +56,61 @@ class PerfilController extends Controller
         ]);       
     }
 
+
+
+    public function cambiarPassword(Request $request)
+    {
+        // 1. Validar datos
+        $request->validate([
+            'password_actual' => 'required',
+            'nueva_password' => 'required|min:6|confirmed'
+        ]);
+    
+        // 2. Obtener usuario autenticado
+        $user = Auth::user();
+    
+        // 3. Verificar contraseña actual
+        if (!Hash::check($request->password_actual, $user->password)) {
+            return back()->withErrors(['password_actual' => 'La contraseña actual es incorrecta.']);
+        }
+    
+        // 4. Guardar nueva contraseña
+        $user->password = Hash::make($request->nueva_password);
+        $user->save();
+    
+        // 5. Respuesta
+        return back()->with('success', 'Contraseña actualizada correctamente.');
+    }
+
+    public function asesoria()
+    {
+        $user = Auth::user();
+    
+        return view('perfil.asesoria', compact('user'));
+    }
+    
+    public function enviarConsulta(Request $request)
+    {
+        $request->validate([
+            'categoria' => 'required|string|max:50',
+            'asunto'    => 'required|string|max:255',
+            'mensaje'   => 'required|string|max:1000',
+            'email'     => 'required|email|max:255',
+        ]);
+    
+        ConsultaSoporte::create([
+            'user_id'       => Auth::id(),
+            'categoria'     => $request->categoria,
+            'asunto'        => $request->asunto,
+            'mensaje'       => $request->mensaje,
+            'email_contacto'=> $request->email,
+            'estado'        => 'pendiente',
+        ]);
+    
+        return back()->with('success', 'Tu consulta fue enviada. Te responderemos lo antes posible.');
+    }
+    
+    
+    
 }
+    

@@ -9,6 +9,8 @@ use App\Models\DireccionEnvio;
 use App\Models\Pago; 
 use App\Models\Pedido;
 use App\Models\PedidoItem;
+use Illuminate\Support\Facades\Log;
+
 
 class CheckoutController extends Controller
 {
@@ -92,213 +94,272 @@ class CheckoutController extends Controller
         return view('checkout.pago', compact('items', 'subtotal', 'igv', 'envio', 'total'));
     }
 
-  public function procesarPago(Request $request)
-{
-    $request->validate([
-        'metodo_pago' => 'required',
-        'codigo_operacion' => 'nullable|string|max:50',
-        'comprobante' => 'nullable|image|mimes:jpg,jpeg,png|max:5000'
-    ]);
+    public function procesarPago(Request $request)
+    {
+        $request->validate([
+            'metodo_pago' => 'required|in:tarjeta,yape,plin',
+            'codigo_operacion' => 'nullable|string|max:50',
+            'comprobante' => 'nullable|image|mimes:jpg,jpeg,png|max:5000'
+        ]);
 
+        $user = Auth::user();
+
+        $direccionEnvioId = session('direccion_envio_id');
+
+        $items = CartItem::where('user_id', $user->id)->with('producto')->get();
+        $subtotal = $items->sum(fn($item) => $item->producto->precio * $item->cantidad);
+        $igv = $subtotal * 0.18;
+        $envio = 10;
+        $total = $subtotal + $igv + $envio;
+
+        $nombreComprobante = null;
+        if ($request->hasFile('comprobante')) {
+            $nombreComprobante = time() . '_' . $request->file('comprobante')->getClientOriginalName();
+            $request->file('comprobante')->storeAs('public/comprobantes', $nombreComprobante);
+        }
+
+        $codigoSeguimiento = 'DC-' . rand(100000, 999999);
+
+        // 🔹 SI ES TARJETA → NO CREAMOS PAGO AQUÍ,
+        // SOLO LO MANDAMOS A CULQI (EL PAGO SE CREA EN culqiPagar)
+        if ($request->metodo_pago === 'tarjeta') {
+            // Guardamos el monto antes de Culqi
+            session(['monto_tarjeta' => $total]);
+            return redirect()->route('culqi.pagar.form', ['total' => $total]);
+        }
+        
+
+        // 🔹 YAPE / PLIN → AQUÍ SIGUE TODO IGUAL
+        $pago = Pago::create([
+            'user_id' => $user->id,
+            'direccion_envio_id' => session('direccion_envio_id'),
+            'metodo_pago' => $request->metodo_pago,
+            'monto' => $total,
+            'estado' => 'pendiente',
+            'codigo_operacion' => $request->codigo_operacion ?? null,
+            'numero_tarjeta' => $request->numero_tarjeta ?? null,
+            'nombre_titular' => $request->nombre_titular ?? null,
+            'vencimiento' => $request->vencimiento ?? null,
+            'cvv' => $request->cvv ?? null,
+            'comprobante' => $nombreComprobante,
+        ]);
+
+        $pedido = Pedido::create([
+            'user_id' => $user->id,
+            'direccion_envio_id' => $direccionEnvioId,
+            'pago_id' => $pago->id,
+            'estado' => 'pendiente',
+            'total' => $total,
+            'metodo_pago' => $request->metodo_pago,
+            'codigo_operacion' => $request->codigo_operacion,
+            'comprobante' => $nombreComprobante,
+            'codigo_seguimiento' => $codigoSeguimiento,
+            'subtotal' => $subtotal,
+            'igv' => $igv,
+            'envio' => $envio
+        ]);
+
+        foreach ($items as $item) {
+            PedidoItem::create([
+                'pedido_id' => $pedido->id,
+                'producto_id' => $item->producto->id,
+                'cantidad' => $item->cantidad,
+                'precio' => $item->producto->precio,
+            ]);
+        }
+
+        session(['pago_id' => $pago->id]);
+
+        return redirect()->route('checkout.resumen')->with('success', 'Pago realizado correctamente.');
+    }
+
+
+
+    // ============================
+    //   FORMULARIO DE PAGO CON CULQI
+
+    public function culqiToken(Request $request)
+{
     $user = Auth::user();
 
-    // Obtener dirección seleccionada
+    $request->validate([
+        'token' => 'required|string',
+    ]);
+
+    // 1. Verificar dirección de envío
     $direccionEnvioId = session('direccion_envio_id');
+    if (!$direccionEnvioId) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Falta la información de envío.'
+        ], 422);
+    }
 
-    // Calcular total del carrito
+    // 2. Obtener carrito
     $items = CartItem::where('user_id', $user->id)->with('producto')->get();
+    if ($items->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Tu carrito está vacío.'
+        ], 422);
+    }
+
+    // 3. Calcular totales
     $subtotal = $items->sum(fn($item) => $item->producto->precio * $item->cantidad);
-    $igv = $subtotal * 0.18;
-    $envio = 10;
-    $total = $subtotal + $igv + $envio;
+    $igv      = $subtotal * 0.18;
+    $envio    = 10;
+    $total    = $subtotal + $igv + $envio;
 
-    // Guardar comprobante si existe
-    $nombreComprobante = null;
-    if ($request->hasFile('comprobante')) {
-        $nombreComprobante = time() . '_' . $request->file('comprobante')->getClientOriginalName();
-        $request->file('comprobante')->storeAs('public/comprobantes', $nombreComprobante);
-    }
-
-    // Generar código de seguimiento
-    $codigoSeguimiento = 'DC-' . rand(100000, 999999);
-
-    // Crear registro de Pago (CÓDIGO CORREGIDO)
+    // 4. Crear registro de pago (simulando pago aprobado)
     $pago = Pago::create([
-        'user_id' => $user->id,
-        'direccion_envio_id' => session('direccion_envio_id'),
-        'metodo_pago' => $request->metodo_pago,
-        'monto' => $total,
-        'estado' => $request->metodo_pago === 'tarjeta' ? 'pagado' : 'pendiente',
-        'codigo_operacion' => $request->codigo_operacion ?? null,
-        'numero_tarjeta' => $request->numero_tarjeta ?? null,
-        'nombre_titular' => $request->nombre_titular ?? null,
-        'vencimiento' => $request->vencimiento ?? null,
-        'cvv' => $request->cvv ?? null,
-        'comprobante' => $nombreComprobante, //
-    ]);
-
-    // Crear pedido
-    $pedido = Pedido::create([
-        'user_id' => $user->id,
+        'user_id'            => $user->id,
         'direccion_envio_id' => $direccionEnvioId,
-        'pago_id' => $pago->id,
-        'estado' => 'pendiente',
-        'total' => $total,
-        'metodo_pago' => $request->metodo_pago,
-        'codigo_operacion' => $request->codigo_operacion,
-        'comprobante' => $nombreComprobante,
-        'codigo_seguimiento' => $codigoSeguimiento,
-        'subtotal' => $subtotal,
-        'igv' => $igv,
-        'envio' => $envio
+        'metodo_pago'        => 'tarjeta',
+        'monto'              => $total,
+        'estado'             => 'pagado',          // ✅ Culqi validó la tarjeta (simulado)
+        'codigo_operacion'   => $request->token,   // Guardamos el token como referencia
+        'numero_tarjeta'     => null,
+        'nombre_titular'     => null,
+        'vencimiento'        => null,
+        'cvv'                => null,
+        'comprobante'        => null,
     ]);
 
-    // Guardar items del pedido
-    foreach ($items as $item) {
-        PedidoItem::create([
-            'pedido_id' => $pedido->id,
-            'producto_id' => $item->producto->id,
-            'cantidad' => $item->cantidad,
-            'precio' => $item->producto->precio,
-        ]);
-    }
-
-    
-
-    // Guardar en sesión para el resumen
+    // 5. Guardar en sesión para la vista resumen
     session(['pago_id' => $pago->id]);
 
-    return redirect()->route('checkout.resumen');
+    return response()->json([
+        'success' => true,
+    ]);
 }
-
 
     // ============================
     //   GUARDAR PAGO
     // ============================
     public function guardarPago(Request $request)
+        {
+            $request->validate([
+                'metodo_pago' => 'required|in:tarjeta,yape,plin,transferencia'
+            ]);
+    
+            // Validaciones según método
+            if ($request->metodo_pago === 'tarjeta') {
+                $request->validate([
+                    'numero_tarjeta' => 'required|digits:16',
+                    'nombre_titular' => 'required|string|max:255',
+                    'vencimiento'    => 'required|string',
+                    'cvv'            => 'required|digits:3',
+                ]);
+            }
+    
+            if ($request->metodo_pago === 'yape' || $request->metodo_pago === 'plin') {
+                $request->validate([
+                    'codigo_operacion' => 'required|string|max:50',
+                    'comprobante'      => 'nullable|image|max:10240',
+                ]);
+            }
+    
+            if ($request->metodo_pago === 'transferencia') {
+                $request->validate([
+                    'comprobante' => 'nullable|image|max:10240',
+                ]);
+            }
+    
+            // Usuario y dirección
+            $user = Auth::user();
+            $direccion_envio_id = session('direccion_envio_id');
+    
+            if (!$direccion_envio_id) {
+                return redirect()->route('checkout.envio')
+                    ->with('error', 'Por favor, completa la información de envío.');
+            }
+    
+            // Calcular totales
+            $items = CartItem::where('user_id', $user->id)->with('producto')->get();
+            $subtotal = $items->sum(fn($i) => $i->producto->precio * $i->cantidad);
+            $igv = $subtotal * 0.18;
+            $envio = 10;
+            $total = $subtotal + $igv + $envio;
+    
+            // Guardar comprobante si existe
+            $comprobantePath = null;
+    
+            if ($request->hasFile('comprobante')) {
+                $comprobantePath = $request->file('comprobante')->store('comprobantes', 'public');
+    
+            // GUARDAR EN DB
+            $pago = Pago::create([
+                'user_id'            => $user->id,
+                'direccion_envio_id' => $direccion_envio_id,
+                'metodo_pago'        => $request->metodo_pago,
+                'monto'              => $total,
+    
+                // Tarjeta
+                'numero_tarjeta'     => $request->numero_tarjeta,
+                'nombre_titular'     => $request->nombre_titular,
+                'vencimiento'        => $request->vencimiento,
+                'cvv'                => $request->cvv,
+    
+                // Yape / Plin
+                'codigo_operacion'   => $request->codigo_operacion,
+    
+                // Comprobante
+                'comprobante'        => $comprobantePath,
+    
+                // Estado
+                'estado'             => $request->metodo_pago === 'tarjeta' ? 'pagado' : 'pendiente',
+            ]);
+    
+            session(['pago_id' => $pago->id]);
+    
+            return redirect()->route('checkout.resumen')
+                ->with('success', 'Pago realizado correctamente.');
+        }
+    }
+    // RESUNEN DE PEDIDO
+   public function resumen()
     {
-        $request->validate([
-            'metodo_pago' => 'required|in:tarjeta,yape,plin,transferencia'
-        ]);
-
-        // Validaciones según método
-        if ($request->metodo_pago === 'tarjeta') {
-            $request->validate([
-                'numero_tarjeta' => 'required|digits:16',
-                'nombre_titular' => 'required|string|max:255',
-                'vencimiento'    => 'required|string',
-                'cvv'            => 'required|digits:3',
-            ]);
-        }
-
-        if ($request->metodo_pago === 'yape' || $request->metodo_pago === 'plin') {
-            $request->validate([
-                'codigo_operacion' => 'required|string|max:50',
-                'comprobante'      => 'nullable|image|max:10240',
-            ]);
-        }
-
-        if ($request->metodo_pago === 'transferencia') {
-            $request->validate([
-                'comprobante' => 'nullable|image|max:10240',
-            ]);
-        }
-
-        // Usuario y dirección
         $user = Auth::user();
+    
+        // Recuperar ID de envío y pago
         $direccion_envio_id = session('direccion_envio_id');
-
-        if (!$direccion_envio_id) {
+        $pago_id = session('pago_id');
+    
+        if (!$direccion_envio_id || !$pago_id) {
             return redirect()->route('checkout.envio')
-                ->with('error', 'Por favor, completa la información de envío.');
+                ->with('error', 'Primero completa los pasos anteriores.');
         }
-
+    
+        // Recuperar modelos reales
+        $direccion = DireccionEnvio::find($direccion_envio_id);
+        $pago = Pago::find($pago_id);
+    
+        // Método de pago seleccionado
+        $metodo_pago = $pago->metodo_pago;
+    
+        // Carrito del usuario
+        $items = CartItem::with('producto')
+            ->where('user_id', $user->id)
+            ->get();
+    
         // Calcular totales
-        $items = CartItem::where('user_id', $user->id)->with('producto')->get();
         $subtotal = $items->sum(fn($i) => $i->producto->precio * $i->cantidad);
         $igv = $subtotal * 0.18;
         $envio = 10;
         $total = $subtotal + $igv + $envio;
-
-        // Guardar comprobante si existe
-        $comprobantePath = null;
-
-        if ($request->hasFile('comprobante')) {
-            $comprobantePath = $request->file('comprobante')->store('comprobantes', 'public');
-
-        // GUARDAR EN DB
-        $pago = Pago::create([
-            'user_id'            => $user->id,
-            'direccion_envio_id' => $direccion_envio_id,
-            'metodo_pago'        => $request->metodo_pago,
-            'monto'              => $total,
-
-            // Tarjeta
-            'numero_tarjeta'     => $request->numero_tarjeta,
-            'nombre_titular'     => $request->nombre_titular,
-            'vencimiento'        => $request->vencimiento,
-            'cvv'                => $request->cvv,
-
-            // Yape / Plin
-            'codigo_operacion'   => $request->codigo_operacion,
-
-            // Comprobante
-            'comprobante'        => $comprobantePath,
-
-            // Estado
-            'estado'             => $request->metodo_pago === 'tarjeta' ? 'pagado' : 'pendiente',
-        ]);
-
-        session(['pago_id' => $pago->id]);
-
-        return redirect()->route('checkout.resumen')
-            ->with('success', 'Pago realizado correctamente.');
+    
+        // RETURN FINAL
+        return view('checkout.resumen', compact(
+            'direccion',
+            'pago',
+            'metodo_pago',
+            'items',
+            'subtotal',
+            'igv',
+            'envio',
+            'total'
+        ));
     }
-    }
-    // RESUNEN DE PEDIDO
-   public function resumen()
-{
-    $user = Auth::user();
-
-    // Recuperar ID de envío y pago
-    $direccion_envio_id = session('direccion_envio_id');
-    $pago_id = session('pago_id');
-
-    if (!$direccion_envio_id || !$pago_id) {
-        return redirect()->route('checkout.envio')
-            ->with('error', 'Primero completa los pasos anteriores.');
-    }
-
-    // Recuperar modelos reales
-    $direccion = DireccionEnvio::find($direccion_envio_id);
-    $pago = Pago::find($pago_id);
-
-    // Método de pago seleccionado
-    $metodo_pago = $pago->metodo_pago;
-
-    // Carrito del usuario
-    $items = CartItem::with('producto')
-        ->where('user_id', $user->id)
-        ->get();
-
-    // Calcular totales
-    $subtotal = $items->sum(fn($i) => $i->producto->precio * $i->cantidad);
-    $igv = $subtotal * 0.18;
-    $envio = 10;
-    $total = $subtotal + $igv + $envio;
-
-    // RETURN FINAL
-    return view('checkout.resumen', compact(
-        'direccion',
-        'pago',
-        'metodo_pago',
-        'items',
-        'subtotal',
-        'igv',
-        'envio',
-        'total'
-    ));
-}
     public function confirmarPedido()
     {
         $user = Auth::user();
@@ -369,6 +430,7 @@ class CheckoutController extends Controller
             'codigo_seguimiento' => $codigo
         ]);
     }
+    
 
 
 
