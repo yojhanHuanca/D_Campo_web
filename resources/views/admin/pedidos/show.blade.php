@@ -42,6 +42,37 @@
                 </div>
             </div>
 
+            {{-- Cupón aplicado --}}
+            @if($pedido->codigo_cupon && $pedido->descuento > 0)
+                <div class="mt-3 p-2 rounded-3 border bg-success bg-opacity-10">
+                    <p class="small fw-bold text-success mb-1">
+                        <i class="bi bi-tag-fill me-1"></i> Cupón aplicado
+                    </p>
+            
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted small">Código:</span>
+                        <span class="fw-semibold small">{{ $pedido->codigo_cupon }}</span>
+                    </div>
+            
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted small">Descuento:</span>
+                        <span class="fw-semibold text-success small">
+                            - S/ {{ number_format($pedido->descuento, 2) }}
+                        </span>
+                    </div>
+            
+                    @if($pedido->cupon)
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted small">Tipo:</span>
+                            <span class="small fw-semibold">
+                                {{ $pedido->cupon->tipo === 'porcentaje' ? $pedido->cupon->valor . '%' : 'Monto fijo' }}
+                            </span>
+                        </div>
+                    @endif
+                </div>
+            @endif
+            
+
             {{-- Productos --}}
             <h6 class="fw-bold mb-2 small">Productos del pedido</h6>
 

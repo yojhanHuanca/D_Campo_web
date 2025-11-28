@@ -120,6 +120,15 @@
             <td class="right"><strong>Envío:</strong></td>
             <td class="right">S/ {{ number_format($pedido->envio, 2) }}</td>
         </tr>
+        {{-- CUPÓN APLICADO --}}
+        @if($pedido->codigo_cupon && $pedido->descuento > 0)
+        <tr>
+            <td class="right"><strong>Cupón ({{ $pedido->codigo_cupon }}):</strong></td>
+            <td class="right" style="color:#4a8f67;">
+                - S/ {{ number_format($pedido->descuento, 2) }}
+            </td>
+        </tr>
+        @endif
         <tr>
             <td class="right"><strong>Total:</strong></td>
             <td class="right"><strong>S/ {{ number_format($pedido->total, 2) }}</strong></td>

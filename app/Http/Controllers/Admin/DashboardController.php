@@ -8,6 +8,7 @@ use App\Models\Categoria;
 use App\Models\Producto;
 use App\Models\Pedido;
 use App\Models\Resena;
+use App\Models\Cupon;
 
 
 class DashboardController extends Controller
@@ -34,6 +35,7 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        $cuponesActivos = Cupon::where('activo', 1)->count();
         
 
         return view('admin.dashboard', compact(
@@ -45,7 +47,8 @@ class DashboardController extends Controller
             'pedidosRecientes',
             'total', 
             'reportadas',
-            'reseñasRecientes'
+            'reseñasRecientes',
+            'cuponesActivos'
         ));
 
     }

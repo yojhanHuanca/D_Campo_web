@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\CartItem;
 use App\Models\DireccionEnvio;
 use App\Models\Pago; 
 use App\Models\Pedido;
 use App\Models\PedidoItem;
 use Illuminate\Support\Facades\Log;
+use App\Models\Cupon;
 
 
 class CheckoutController extends Controller
@@ -31,7 +33,8 @@ class CheckoutController extends Controller
         $subtotal = $items->sum(fn($i) => $i->producto->precio * $i->cantidad);
         $igv = $subtotal * 0.18;
         $envio = 10;
-        $total = $subtotal + $igv + $envio;
+        $descuento = session('cupon_descuento', 0);
+        $total = ($subtotal + $igv + $envio) - $descuento;
 
         $direccion = DireccionEnvio::where('user_id', $user->id)
             ->latest()
@@ -89,7 +92,9 @@ class CheckoutController extends Controller
         $subtotal = $items->sum(fn($i) => $i->producto->precio * $i->cantidad);
         $igv = $subtotal * 0.18;
         $envio = 10;
-        $total = $subtotal + $igv + $envio;
+
+        $descuento = session('cupon_descuento', 0);
+        $total = ($subtotal + $igv + $envio) - $descuento;
 
         return view('checkout.pago', compact('items', 'subtotal', 'igv', 'envio', 'total'));
     }
@@ -320,7 +325,7 @@ class CheckoutController extends Controller
    public function resumen()
     {
         $user = Auth::user();
-    
+        
         // Recuperar ID de envío y pago
         $direccion_envio_id = session('direccion_envio_id');
         $pago_id = session('pago_id');
@@ -346,7 +351,11 @@ class CheckoutController extends Controller
         $subtotal = $items->sum(fn($i) => $i->producto->precio * $i->cantidad);
         $igv = $subtotal * 0.18;
         $envio = 10;
-        $total = $subtotal + $igv + $envio;
+
+        $descuento = session('cupon_descuento', 0);
+        $codigo_cupon = session('cupon_codigo', null);
+    
+        $total = ($subtotal + $igv + $envio) - $descuento;
     
         // RETURN FINAL
         return view('checkout.resumen', compact(
@@ -357,9 +366,12 @@ class CheckoutController extends Controller
             'subtotal',
             'igv',
             'envio',
-            'total'
+            'total',
+            'codigo_cupon',   
+            'descuento' 
         ));
     }
+
     public function confirmarPedido()
     {
         $user = Auth::user();
@@ -367,6 +379,10 @@ class CheckoutController extends Controller
         // 1. Obtener datos guardados en sesión
         $direccion_id = session('direccion_envio_id');
         $pago_id = session('pago_id');
+    
+        $cupon_id = session('cupon_id');           
+        $descuento = session('cupon_descuento');   // <- nombre correcto
+        $codigo_cupon = session('cupon_codigo');   // <- nombre correcto
     
         // Validación
         if (!$direccion_id || !$pago_id) {
@@ -378,52 +394,96 @@ class CheckoutController extends Controller
         $cartItems = CartItem::with('producto')
             ->where('user_id', $user->id)
             ->get();
-        
-            // Validación
+    
         if ($cartItems->isEmpty()) {
             return redirect()->route('cart.index')
                 ->with('error', 'Tu carrito está vacío.');
         }
     
-        
-    
         // 3. Calcular montos
         $subtotal = $cartItems->sum(fn($item) => $item->producto->precio * $item->cantidad);
         $igv = $subtotal * 0.18;
         $envio = 10;
-        $total = $subtotal + $igv + $envio;
+    
+        // Total con cupón
+        if ($cupon_id && $descuento) {
+            $total = $subtotal + $igv + $envio - $descuento;
+        } else {
+            $total = $subtotal + $igv + $envio;
+        }
     
         // 4. Crear código de seguimiento
         $codigo = 'DC-' . rand(100000, 999999);
     
         // 5. Crear el pedido
         $pedido = Pedido::create([
-            'user_id' => $user->id,
-            'pago_id' => $pago_id,
-            'direccion_envio_id' => $direccion_id,
-            'codigo_seguimiento' => $codigo,
-            'subtotal' => $subtotal,
-            'igv' => $igv,
-            'envio' => $envio,
-            'total' => $total,
-            'estado' => 'pendiente'
-        ]);
+            'user_id'             => $user->id,
+            'pago_id'             => $pago_id,
+            'direccion_envio_id'  => $direccion_id,
     
+            // 🔥 Guardamos cupón
+            'cupon_id'            => $cupon_id,
+            'codigo_cupon'        => $codigo_cupon,
+            'descuento'           => $descuento ?? 0,
+    
+            'codigo_seguimiento'  => $codigo,
+            'subtotal'            => $subtotal,
+            'igv'                 => $igv,
+            'envio'               => $envio,
+            'total'               => $total,
+            'estado'              => 'pendiente'
+        ]);
+
+        
+        
+
         // 6. Guardar items del pedido
         foreach ($cartItems as $item) {
             PedidoItem::create([
-                'pedido_id' => $pedido->id,
+                'pedido_id'   => $pedido->id,
                 'producto_id' => $item->producto_id,
-                'cantidad' => $item->cantidad,
-                'precio' => $item->producto->precio
+                'cantidad'    => $item->cantidad,
+                'precio'      => $item->producto->precio
             ]);
         }
-    
-        // 7. Limpiar carrito
-        CartItem::where('user_id', $user->id)->delete();
-    
-        // 8. Limpiar sesión
-        session()->forget(['direccion_envio_id', 'pago_id']);
+
+        //  Registrar uso del cupón 
+        if ($cupon_id) {
+        
+            // Registrar que el usuario ya usó este cupón
+            DB::table('cupon_usuario')->insert([
+                'user_id'    => $user->id,
+                'cupon_id'   => $cupon_id,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        
+            // Aumentar contador de usos
+            $cupon = Cupon::find($cupon_id);
+        
+            if ($cupon) {
+                $cupon->usos_realizados += 1;
+        
+                // Si alcanzó el límite, desactivarlo
+                if (!is_null($cupon->limite_uso) && $cupon->usos_realizados >= $cupon->limite_uso) {
+                    $cupon->activo = 0;
+                }
+        
+                $cupon->save();
+            }
+        }
+        
+                // 7. Limpiar carrito
+                CartItem::where('user_id', $user->id)->delete();
+            
+                // 8. Limpiar sesión
+                session()->forget([
+                    'direccion_envio_id',
+                    'pago_id',
+                    'cupon_codigo',
+                    'cupon_descuento',
+                    'cupon_id'
+        ]);
     
         // 9. Confirmación final
         return view('checkout.confirmacion', [
@@ -431,7 +491,6 @@ class CheckoutController extends Controller
         ]);
     }
     
-
 
 
 }

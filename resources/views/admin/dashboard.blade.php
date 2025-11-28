@@ -118,7 +118,7 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <p class="text-muted mb-2 small text-uppercase fw-semibold">Cupones Activos</p>
-                            <h3 class="fw-bold mb-0">3</h3>
+                            <h3 class="fw-bold mb-0">{{ $cuponesActivos }}</h3>
                         </div>
                         <div class="bg-info bg-opacity-10 rounded p-3">
                             <i class="bi bi-ticket-perforated text-info" style="font-size: 1.5rem;"></i>

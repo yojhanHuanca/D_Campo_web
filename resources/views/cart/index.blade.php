@@ -209,19 +209,39 @@
         {{-- CUPÓN --}}
         <div class="card border-0 shadow-sm rounded-4 mt-4">
             <div class="card-body p-4">
+        
+                {{-- Título --}}
                 <div class="d-flex align-items-center mb-3">
                     <i class="bi bi-tag-fill text-success fs-5 me-2"></i>
                     <h6 class="fw-bold mb-0">Cupón de Descuento</h6>
                 </div>
-
+        
+                {{-- INPUT + BOTÓN --}}
                 <div class="input-group input-group-lg shadow-sm">
-                    <input type="text" class="form-control bg-light border-0" placeholder="Ingresa tu código">
-                    <button class="btn btn-success px-4">
+                    <input type="text"
+                           name="codigo_cupon"
+                           id="codigoCupon"
+                           class="form-control bg-light border-0"
+                           placeholder="Ingresa tu código">
+        
+                    <button type="button"
+                            id="btnAplicarCupon"
+                            class="btn btn-success px-4">
                         <i class="bi bi-check-circle me-1"></i>Aplicar
                     </button>
                 </div>
+        
+                {{-- MENSAJES --}}
+                <div id="respuestaCupon"
+                     class="mt-3 text-success fw-bold"
+                     style="display:none;"></div>
+        
+                <div id="errorCupon"
+                     class="mt-3 text-danger fw-bold"
+                     style="display:none;"></div>
             </div>
         </div>
+        
 
     </div>
 
@@ -320,12 +340,58 @@
     </div>
 
 </div>
-
 @endif
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.getElementById('btnAplicarCupon').addEventListener('click', function () {
 
+    let codigo = document.getElementById('codigoCupon').value.trim();
+    let total = {{ isset($subtotal) ? $subtotal + (isset($igv) ? $igv : 0) + 10 : 10 }};
+
+    if (codigo === "") {
+        document.getElementById('errorCupon').style.display = 'block';
+        document.getElementById('errorCupon').innerText = "Ingresa un código.";
+        return;
+    }
+
+    fetch("{{ route('carrito.aplicarCupon') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        body: JSON.stringify({ codigo: codigo, total: total })
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if (data.success) {
+            // Mostrar mensaje exitoso
+            document.getElementById('errorCupon').style.display = 'none';
+            document.getElementById('respuestaCupon').style.display = 'block';
+            document.getElementById('respuestaCupon').innerText =
+                "Cupón aplicado: -S/ " + data.descuento.toFixed(2);
+
+            // Cambiar TOTAL en pantalla
+            let nuevoTotal = total - data.descuento;
+            let totalElement = document.querySelector(".fw-bold.fs-4.text-success");
+
+            if (totalElement) {
+                totalElement.innerText = "S/ " + nuevoTotal.toFixed(2);
+            }
+
+        } else {
+            // Mostrar error
+            document.getElementById('respuestaCupon').style.display = 'none';
+            document.getElementById('errorCupon').style.display = 'block';
+            document.getElementById('errorCupon').innerText = data.message;
+        }
+    });
+
+});
+
+</script>
 </body>
 </html>

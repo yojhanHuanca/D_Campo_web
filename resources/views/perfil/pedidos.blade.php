@@ -113,6 +113,16 @@
                             <span class="fw-bold text-success small">{{ $pedido->codigo_seguimiento }}</span>
                         </div>
 
+                        {{-- Cupón aplicado (si existe) --}}
+                        @if($pedido->codigo_cupon && $pedido->descuento > 0)
+                            <div class="mt-2">
+                                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1">
+                                    Cupón: {{ $pedido->codigo_cupon }} 
+                                    · Descuento: -S/ {{ number_format($pedido->descuento, 2) }}
+                                </span>
+                            </div>
+                        @endif
+
                         {{-- Total y Botones --}}
                         <div class="d-flex justify-content-between align-items-center mt-3">
                             <div>

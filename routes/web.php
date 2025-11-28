@@ -96,6 +96,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/carrito/agregar', [CartController::class, 'add'])->name('cart.add');
     Route::post('/carrito/actualizar', [CartController::class, 'update'])->name('cart.update');
     Route::post('/carrito/eliminar', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/carrito/aplicar-cupon', [CartController::class, 'aplicarCupon'])
+    ->name('carrito.aplicarCupon');
     
 });
 
