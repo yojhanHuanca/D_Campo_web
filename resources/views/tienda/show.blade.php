@@ -194,8 +194,8 @@
 
                 {{-- TAB Descripción --}}
                 <div class="tab-pane fade show active" id="tab-descripcion">
-                    <h5 class="fw-bold mb-3">Modo de uso</h5>
-                    <p class="mb-3">Aplicar 3-4 gotas en rostro y cuello limpios. Usar mañana y noche antes de la crema hidratante.</p>
+                    <h5 class="fw-bold mb-3"></h5>
+                    <p class="mb-3">Los productos a base de palta de D’campo están elaborados con ingredientes naturales que aprovechan sus propiedades nutritivas. Gracias a su riqueza en vitaminas, antioxidantes y aceites esenciales, brindan hidratación profunda, suavidad y protección para la piel, ayudando a mantenerla saludable, luminosa y con un aspecto renovado.</p>
 
                     <div class="row g-3 mt-3">
                         <div class="col-md-4">

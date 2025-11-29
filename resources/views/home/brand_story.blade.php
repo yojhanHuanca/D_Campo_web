@@ -35,7 +35,7 @@
                             <i class="bi bi-award fs-3 text-success"></i>
                         </div>
                         <div>
-                            <p class="h3 m-0 text-success">5+</p>
+                            <p class="h3 m-0 text-success">+5</p>
                             <small class="text-muted">Años de experiencia</small>
                         </div>
                     </div>

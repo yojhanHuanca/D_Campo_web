@@ -120,7 +120,7 @@
         <div class="row g-4">
 
             <div class="col-md-3">
-                <h2 class="fw-bold display-5">15k+</h2>
+                <h2 class="fw-bold display-5">+10k</h2>
                 <p class="text-white-50">Clientes satisfechos</p>
             </div>
 
@@ -130,12 +130,12 @@
             </div>
 
             <div class="col-md-3">
-                <h2 class="fw-bold display-5">50+</h2>
+                <h2 class="fw-bold display-5">+50</h2>
                 <p class="text-white-50">Agricultores aliados</p>
             </div>
 
             <div class="col-md-3">
-                <h2 class="fw-bold display-5">5+</h2>
+                <h2 class="fw-bold display-5">+5</h2>
                 <p class="text-white-50">Años de experiencia</p>
             </div>
 
