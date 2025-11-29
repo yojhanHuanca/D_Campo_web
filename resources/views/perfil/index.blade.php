@@ -22,8 +22,15 @@
         <div class="col-md-9">
 
             {{-- Título --}}
-            <h4 class="fw-bold mb-1">Mi Perfil 👤📋</h4>
-            <p class="text-muted small mb-3">Gestiona tu información personal y preferencias</p>
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                    <i class="bi bi-person-circle text-success" style="font-size: 2rem;"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-1">Mi Perfil</h4>
+                    <p class="text-muted small mb-0">Gestiona tu información personal y preferencias</p>
+                </div>
+            </div>
 
             {{-- Cards de Resumen --}}
             <div class="row g-3 mb-3">

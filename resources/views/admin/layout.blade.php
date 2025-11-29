@@ -78,7 +78,7 @@
                     <span>Reseñas</span>
                 </a>
 
-                <a href="#" 
+                <a href="{{ route('admin.cupones.index') }}" 
                    class="d-flex align-items-center text-decoration-none text-dark px-3 py-2 rounded mb-1 hover-item">
                     <i class="bi bi-ticket-perforated me-3"></i>
                     <span>Cupones</span>

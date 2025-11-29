@@ -269,11 +269,19 @@
                         <span class="text-muted">Envío</span>
                         <span class="fw-semibold">S/ {{ number_format($envio, 2) }}</span>
                     </div>
+                    @if($descuento > 0)
+                        <div class="d-flex justify-content-between mb-3 pb-2 border-bottom">
+                            <span class="text-muted">Descuento ({{ $codigo_cupon }})</span>
+                            <span class="fw-semibold text-success">- S/ {{ number_format($descuento, 2) }}</span>
+                        </div>
+                    @endif
 
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h5 class="mb-0 fw-bold">Total a Pagar</h5>
                         <h4 class="mb-0 fw-bold text-success">S/ {{ number_format($total, 2) }}</h4>
                     </div>
+
+
 
                     {{-- Botón Confirmar --}}
                     <a href="{{ route('checkout.confirmacion') }}"

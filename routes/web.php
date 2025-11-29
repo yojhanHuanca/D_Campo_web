@@ -8,7 +8,9 @@ use App\Http\Controllers\Admin\CategoriaController;
 use App\Http\Controllers\Admin\ProductoController;
 use App\Http\Controllers\Admin\PedidoAdminController;
 use App\Http\Controllers\Admin\ResenaAdminController;
+use App\Http\Controllers\Admin\CuponController;
 use App\Http\Controllers\ResenaController;
+use App\Http\Controllers\FavoritoController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\ContactoController; 
@@ -16,6 +18,8 @@ use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\PerfilController;
+use App\Http\Controllers\CulqiController;
+
 
 
 
@@ -69,14 +73,20 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/pedidos/{id}/estado', [PedidoAdminController::class, 'cambiarEstado'])
         ->name('admin.pedidos.cambiarEstado');
 
-    // Reseñas
-
     // RESEÑAS
     Route::get('/admin/resenas', [ResenaAdminController::class, 'index'])->name('admin.resenas.index');
     Route::get('/admin/resenas/{id}', [ResenaAdminController::class, 'show'])->name('admin.resenas.show');
     Route::post('/admin/resenas/{id}/aprobar', [ResenaAdminController::class, 'aprobar'])->name('admin.resenas.aprobar');
     Route::delete('/admin/resenas/{id}', [ResenaAdminController::class, 'eliminar'])->name('admin.resenas.eliminar');
 
+    //  cupones 
+    Route::resource('cupones', CuponController::class)
+        ->names('admin.cupones');
+
+    // Activar / desactivar cupón
+    Route::patch('cupones/{id}/toggle', [CuponController::class, 'toggleActivo'])
+        ->name('admin.cupones.toggle');
+        
 });
 
 
@@ -86,6 +96,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/carrito/agregar', [CartController::class, 'add'])->name('cart.add');
     Route::post('/carrito/actualizar', [CartController::class, 'update'])->name('cart.update');
     Route::post('/carrito/eliminar', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/carrito/aplicar-cupon', [CartController::class, 'aplicarCupon'])
+    ->name('carrito.aplicarCupon');
     
 });
 
@@ -142,6 +154,13 @@ Route::middleware('auth')->group(function () {
     //Prosesar pago
     Route::post('/checkout/pago', [CheckoutController::class, 'procesarPago'])
         ->name('checkout.pago.submit');
+    Route::get('/culqi/pagar', [CheckoutController::class, 'culqiForm'])
+        ->name('culqi.pagar.form');
+    Route::post('/culqi/pagar', [CulqiController::class, 'procesarPago'])
+       ->name('culqi.pagar');
+    Route::post('/culqi/token', [CheckoutController::class, 'culqiToken'])
+       ->name('culqi.token');
+    
 
     // CHECKOUT - RESUMEN
     Route::get('/checkout/resumen', [CheckoutController::class, 'resumen'])
@@ -171,6 +190,31 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/perfil/pedidos/{id}/boleta', [PedidoController::class, 'descargarBoleta'])
         ->name('perfil.pedido.boleta');
+
+    // Lista de favoritos
+    Route::get('/perfil/favoritos', [FavoritoController::class, 'index'])
+        ->name('perfil.favoritos');
+
+    // Agregar / quitar favorito
+    Route::post('/favorito/{producto}', [FavoritoController::class, 'toggle'])
+        ->name('favorito.toggle');
+
+    // cambio de contrase
+    Route::get('/perfil/seguridad', function () {
+        return view('perfil.seguridad');
+    })->name('perfil.seguridad')->middleware('auth');
+    
+    Route::post('/perfil/seguridad/cambiar-password', 
+        [PerfilController::class, 'cambiarPassword']
+    )->name('perfil.seguridad.cambiar')->middleware('auth');
+
+    // Ver página de Asesoría
+    Route::get('/perfil/asesoria', [PerfilController::class, 'asesoria'])
+        ->name('perfil.asesoria');
+
+    // Enviar consulta de soporte
+    Route::post('/perfil/asesoria', [PerfilController::class, 'enviarConsulta'])
+        ->name('perfil.asesoria.enviar');
 
 
 

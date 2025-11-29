@@ -119,16 +119,16 @@
                 <p class="text-muted">Selecciona tu método de pago preferido</p>
             </div>
 
-            <form action="{{ route('checkout.pago.submit') }}" method="POST" enctype="multipart/form-data">
+            <form id="formPago" action="{{ route('checkout.pago.submit') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 {{-- BOTONES DE MÉTODOS DE PAGO --}}
                 <div class="row g-3 mb-5">
-                    
+
                     {{-- Tarjeta --}}
-                    <div class="col-md-6 col-lg-3">
+                    <div class="col-md-6 col-lg-4">
                         <label class="metodo-pago-btn card border-2 h-100 text-center p-4 rounded-4" id="btn_tarjeta">
-                            <input type="radio" name="metodo_pago" value="tarjeta" class="d-none">
+                            <input type="radio" name="metodo_pago" value="tarjeta" class="d-none" />
                             <i class="bi bi-credit-card-2-front text-success fs-1 d-block mb-3"></i>
                             <h6 class="fw-bold mb-1">Tarjeta</h6>
                             <small class="text-muted">Crédito/Débito</small>
@@ -136,9 +136,9 @@
                     </div>
 
                     {{-- Yape --}}
-                    <div class="col-md-6 col-lg-3">
+                    <div class="col-md-6 col-lg-4">
                         <label class="metodo-pago-btn card border-2 h-100 text-center p-4 rounded-4" id="btn_yape">
-                            <input type="radio" name="metodo_pago" value="yape" class="d-none">
+                            <input type="radio" name="metodo_pago" value="yape" class="d-none" />
                             <i class="bi bi-phone-fill text-success fs-1 d-block mb-3"></i>
                             <h6 class="fw-bold mb-1">Yape</h6>
                             <small class="text-muted">Pago móvil</small>
@@ -146,22 +146,12 @@
                     </div>
 
                     {{-- Plin --}}
-                    <div class="col-md-6 col-lg-3">
+                    <div class="col-md-6 col-lg-4">
                         <label class="metodo-pago-btn card border-2 h-100 text-center p-4 rounded-4" id="btn_plin">
-                            <input type="radio" name="metodo_pago" value="plin" class="d-none">
+                            <input type="radio" name="metodo_pago" value="plin" class="d-none" />
                             <i class="bi bi-phone text-success fs-1 d-block mb-3"></i>
                             <h6 class="fw-bold mb-1">Plin</h6>
                             <small class="text-muted">Pago móvil</small>
-                        </label>
-                    </div>
-
-                    {{-- Transferencia --}}
-                    <div class="col-md-6 col-lg-3">
-                        <label class="metodo-pago-btn card border-2 h-100 text-center p-4 rounded-4" id="btn_transferencia">
-                            <input type="radio" name="metodo_pago" value="transferencia" class="d-none">
-                            <i class="bi bi-bank text-success fs-1 d-block mb-3"></i>
-                            <h6 class="fw-bold mb-1">Transferencia</h6>
-                            <small class="text-muted">Bancaria</small>
                         </label>
                     </div>
 
@@ -171,71 +161,14 @@
                 <div class="row">
                     <div class="col-12">
 
-                        {{-- TARJETA --}}
+                                               {{-- TARJETA --}}
                         <div class="card border-0 shadow-sm rounded-4 d-none" id="card_tarjeta">
                             <div class="card-body p-5">
                                 <h5 class="fw-bold mb-4">
                                     <i class="bi bi-credit-card-2-front text-success me-2"></i>
-                                    Información de Tarjeta
+                                    Pago con Tarjeta
                                 </h5>
-
-                                <div class="mb-4">
-                                    <label class="form-label fw-semibold">Número de Tarjeta *</label>
-                                    <div class="input-group input-group-lg">
-                                        <span class="input-group-text bg-light border-0">
-                                            <i class="bi bi-credit-card"></i>
-                                        </span>
-                                        <input type="text" name="numero_tarjeta" 
-                                               class="form-control border-0 bg-light" 
-                                               placeholder="1234 5678 9012 3456"
-                                               maxlength="19">
-                                    </div>
-                                </div>
-
-                                <div class="mb-4">
-                                    <label class="form-label fw-semibold">Nombre del Titular *</label>
-                                    <div class="input-group input-group-lg">
-                                        <span class="input-group-text bg-light border-0">
-                                            <i class="bi bi-person"></i>
-                                        </span>
-                                        <input type="text" name="nombre_titular" 
-                                               class="form-control border-0 bg-light" 
-                                               placeholder="JUAN PÉREZ"
-                                               style="text-transform: uppercase;">
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6 mb-4">
-                                        <label class="form-label fw-semibold">Fecha de Vencimiento *</label>
-                                        <div class="input-group input-group-lg">
-                                            <span class="input-group-text bg-light border-0">
-                                                <i class="bi bi-calendar"></i>
-                                            </span>
-                                            <input type="text" name="vencimiento" 
-                                                   class="form-control border-0 bg-light" 
-                                                   placeholder="MM/AA"
-                                                   maxlength="5">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-4">
-                                        <label class="form-label fw-semibold">CVV *</label>
-                                        <div class="input-group input-group-lg">
-                                            <span class="input-group-text bg-light border-0">
-                                                <i class="bi bi-lock"></i>
-                                            </span>
-                                            <input type="text" name="cvv" 
-                                                   class="form-control border-0 bg-light" 
-                                                   placeholder="123"
-                                                   maxlength="3">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="alert alert-info bg-info bg-opacity-10 border-0">
-                                    <i class="bi bi-shield-check me-2"></i>
-                                    <small>Tu información está protegida con encriptación SSL</small>
-                                </div>
+                                <p class="text-muted">Aquí se cargará el formulario de Culqi</p>
                             </div>
                         </div>
 
@@ -325,60 +258,6 @@
                             </div>
                         </div>
 
-                        {{-- TRANSFERENCIA --}}
-                        <div class="card border-0 shadow-sm rounded-4 d-none" id="card_transferencia">
-                            <div class="card-body p-5">
-                                <h5 class="fw-bold mb-4">
-                                    <i class="bi bi-bank text-success me-2"></i>
-                                    Datos para Transferencia
-                                </h5>
-
-                                <div class="alert alert-warning bg-warning bg-opacity-10 border-0 mb-4">
-                                    <i class="bi bi-info-circle me-2"></i>
-                                    <small>Envía tu comprobante de pago después de realizar la transferencia</small>
-                                </div>
-
-                                <div class="row g-4">
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold text-muted small">BANCO</label>
-                                        <div class="p-3 bg-light rounded-3 fw-bold">
-                                            <i class="bi bi-bank2 text-success me-2"></i>
-                                            BCP - Banco de Crédito del Perú
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold text-muted small">CUENTA CORRIENTE</label>
-                                        <div class="p-3 bg-light rounded-3 fw-bold">
-                                            194-2345678-0-99
-                                        </div>
-                                    </div>
-
-                                    <div class="col-12">
-                                        <label class="form-label fw-semibold text-muted small">CCI</label>
-                                        <div class="p-3 bg-light rounded-3 fw-bold">
-                                            002-194-002345678099-12
-                                        </div>
-                                    </div>
-
-                                    <div class="col-12">
-                                        <label class="form-label fw-semibold text-muted small">TITULAR</label>
-                                        <div class="p-3 bg-light rounded-3 fw-bold">
-                                            D'Campo Productos Naturales SAC
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mt-4">
-                                    <label class="form-label fw-semibold">Subir comprobante de pago *</label>
-                                    <input type="file" name="comprobante" 
-                                           class="form-control form-control-lg border-0 bg-light"
-                                           accept="image/*">
-                                    <small class="text-muted">Sube una foto del voucher de transferencia</small>
-                                </div>
-                            </div>
-                        </div>
-
                         {{-- Mensaje inicial --}}
                         <div class="text-center py-5" id="mensaje_inicial">
                             <i class="bi bi-cursor text-muted display-1 mb-3"></i>
@@ -412,45 +291,112 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+{{-- Culqi v4 --}}
+<script src="https://checkout.culqi.com/js/v4"></script>
+
 <script>
+    // ==========================
+    //   LÓGICA DE TABS Y DISEÑO
+    // ==========================
     const botones = {
         tarjeta: document.getElementById('btn_tarjeta'),
         yape: document.getElementById('btn_yape'),
         plin: document.getElementById('btn_plin'),
-        transferencia: document.getElementById('btn_transferencia')
+        transferencia: document.getElementById('btn_transferencia') ?? null
     };
 
     const cards = {
         tarjeta: document.getElementById('card_tarjeta'),
         yape: document.getElementById('card_yape'),
         plin: document.getElementById('card_plin'),
-        transferencia: document.getElementById('card_transferencia')
+        transferencia: document.getElementById('card_transferencia') ?? null
     };
 
     const mensajeInicial = document.getElementById('mensaje_inicial');
 
-    // Escuchar cambios en los radios
     document.querySelectorAll("input[name='metodo_pago']").forEach(radio => {
         radio.addEventListener('change', function() {
             const metodo = this.value;
 
-            // Remover clase active de todos
-            Object.values(botones).forEach(btn => btn.classList.remove('active'));
-            
-            // Agregar active al seleccionado
-            botones[metodo].classList.add('active');
+            Object.values(botones).forEach(btn => btn && btn.classList.remove('active'));
+            Object.values(cards).forEach(card => card && card.classList.add('d-none'));
 
-            // Ocultar todos los cards
-            Object.values(cards).forEach(card => card.classList.add('d-none'));
-            
-            // Mostrar el card seleccionado
-            cards[metodo].classList.remove('d-none');
+            if (botones[metodo]) botones[metodo].classList.add('active');
+            if (cards[metodo]) cards[metodo].classList.remove('d-none');
 
-            // Ocultar mensaje inicial
             mensajeInicial.classList.add('d-none');
         });
     });
+
+    // ==========================
+    //   INTEGRACIÓN CULQI TARJETA
+    // ==========================
+
+    // Llave pública desde .env
+    Culqi.publicKey = "{{ env('CULQI_PUBLIC_KEY') }}";
+
+    const formPago = document.getElementById('formPago');
+
+    formPago.addEventListener('submit', function (e) {
+        const metodoSeleccionado = document.querySelector("input[name='metodo_pago']:checked")?.value;
+
+        // Solo interceptamos TARJETA. Yape / Plin siguen normal.
+        if (metodoSeleccionado === 'tarjeta') {
+            e.preventDefault();  // No mandamos el form a Laravel todavía
+
+            Culqi.options({
+                lang: "es",
+                modal: true,
+                installments: false
+            });
+
+            Culqi.settings({
+                title: "D'Campo",
+                currency: "PEN",
+                amount: {{ intval($total * 100) }},          // Monto en centavos
+                email: "{{ auth()->user()->email }}"
+            });
+
+            Culqi.open();
+        }
+    });
+
+    // Cuando Culqi genera el token correctamente
+    Culqi.on('token', async function (token) {
+        try {
+            const res = await fetch("{{ route('culqi.token') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({
+                    token: token.id
+                })
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                // Ir al RESUMEN
+                window.location.href = "{{ route('checkout.resumen') }}";
+            } else {
+                alert(data.message || 'No se pudo registrar el pago.');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error al procesar el pago.');
+        }
+    });
+
+    // Si Culqi devuelve error antes de tokenizar
+    Culqi.on('error', function (error) {
+        alert(error.user_message || 'Error en Culqi, intenta nuevamente.');
+    });
 </script>
+
 
 </body>
 </html>

@@ -15,15 +15,15 @@
 </head>
 <body class="bg-light">
 
-    {{-- ✅ HEADER IMPORTADO --}}
+    {{-- HEADER IMPORTADO --}}
     @include('partials.header')
 
-    {{-- 📌 CONTENIDO PRINCIPAL --}}
+    {{-- CONTENIDO PRINCIPAL --}}
     <main class="min-vh-100">
         @yield('content')
     </main>
 
-    {{-- ✅ FOOTER IMPORTADO --}}
+    {{-- FOOTER IMPORTADO --}}
     @include('partials.footer')
 
     {{-- Bootstrap JS --}}

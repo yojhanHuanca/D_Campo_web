@@ -52,4 +52,10 @@ class Producto extends Model
     {
         return $this->resenas()->where('user_id', $userId)->exists();
     }
+
+    public function favoritos()
+    {
+        return $this->hasMany(Favorito::class);
+    }
+
 }

@@ -8,7 +8,7 @@ use App\Models\PedidoItem;
 use App\Models\DireccionEnvio;
 use App\Models\Pago;
 use App\Models\User;
-
+use App\Models\Cupon;
 
 class Pedido extends Model
 {
@@ -18,12 +18,20 @@ class Pedido extends Model
         'user_id',
         'pago_id',
         'direccion_envio_id',
+    
+        'cupon_id',
+        'codigo_cupon',
+        'descuento',
+    
         'codigo_seguimiento',
         'subtotal',
         'igv',
         'envio',
         'total',
-        'estado'
+        'estado',
+        'comprobante',
+        'codigo_operacion',
+        'metodo_pago',
     ];
 
     // Relación con usuario
@@ -54,5 +62,10 @@ class Pedido extends Model
     public function usuario()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function cupon()
+    {
+        return $this->belongsTo(Cupon::class);
     }
 }

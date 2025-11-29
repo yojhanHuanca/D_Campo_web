@@ -3,10 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-
 use App\Models\Resena;
-use App\Models\Producto;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class ResenaAdminController extends Controller
@@ -15,43 +12,55 @@ class ResenaAdminController extends Controller
     public function index(Request $request)
     {
         $busqueda = $request->q;
-
+        $estado = $request->estado;  // <-- nuevo
+    
         $resenas = Resena::with(['usuario', 'producto'])
+    
+            // FILTRO POR ESTADO
+            ->when($estado, function ($query) use ($estado) {
+                $query->where('estado', $estado);
+            })
+    
+            // FILTRO DE BÚSQUEDA
             ->when($busqueda, function ($query) use ($busqueda) {
                 $query->where('comentario', 'like', "%$busqueda%")
                     ->orWhereHas('usuario', fn ($q) => $q->where('name', 'like', "%$busqueda%"))
                     ->orWhereHas('producto', fn ($q) => $q->where('nombre', 'like', "%$busqueda%"));
             })
+    
             ->orderBy('created_at', 'desc')
             ->get();
-
-        // Estadísticas
-        $total = $resenas->count();
-        $reportadas = $resenas->where('estado', 'reportada')->count();
-        $aprobadas = $resenas->where('estado', 'aprobada')->count();
-        $promedio = $resenas->avg('calificacion') ?? 0;
-
+    
+        // ESTADÍSTICAS (SIEMPRE SOBRE TODAS LAS RESEÑAS)
+        $total = Resena::count();
+        $reportadas = Resena::where('estado', 'reportada')->count();
+        $aprobadas = Resena::where('estado', 'aprobada')->count();
+        $pendientes = Resena::where('estado', 'pendiente')->count();
+        $promedio = Resena::avg('puntuacion') ?? 0;
+    
         return view('admin.resenas.index', compact(
-            'resenas', 'total', 'reportadas', 'aprobadas', 'promedio', 'busqueda'
+            'resenas', 'total', 'reportadas', 'aprobadas',
+            'pendientes', 'promedio', 'busqueda', 'estado'
         ));
     }
 
-    // DETALLES
+    // DETALLES (MODAL FLOTANTE)
     public function show($id)
     {
         $resena = Resena::with(['usuario', 'producto'])->findOrFail($id);
-
         return view('admin.resenas.show', compact('resena'));
     }
 
-    // APROBAR
+    // APROBAR RESEÑA
     public function aprobar($id)
     {
         $resena = Resena::findOrFail($id);
         $resena->estado = 'aprobada';
         $resena->save();
 
-        return back()->with('success', 'Reseña aprobada correctamente.');
+        return redirect()
+            ->route('admin.resenas.index')
+            ->with('success', 'La reseña fue aprobada correctamente.');
     }
 
     // ELIMINAR
@@ -59,6 +68,8 @@ class ResenaAdminController extends Controller
     {
         Resena::findOrFail($id)->delete();
 
-        return back()->with('success', 'Reseña eliminada correctamente.');
+        return redirect()
+            ->route('admin.resenas.index')
+            ->with('success', 'La reseña fue eliminada correctamente.');
     }
 }
