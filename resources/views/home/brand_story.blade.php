@@ -50,7 +50,7 @@
                     <i class="bi bi-heart-fill"></i> Nuestra Historia
                 </div>
 
-                <h2 class="fw-bold mb-4">Nacimos del amor por lo natural</h2>
+                <h2 class="fw-bold mb-4">Inspirados por la belleza natural</h2>
 
                 <p class="text-muted lh-lg">
                     <strong class="text-dark">D'Campo</strong> nace de la pasión por la naturaleza y el deseo de compartir 
@@ -70,7 +70,7 @@
                 <div class="row text-center pt-3 g-3">
                     <div class="col-4">
                         <div class="p-4 bg-white shadow-sm rounded-4 border">
-                            <i class="bi bi-leaf fs-2 text-success"></i>
+                            <i class="bi bi-tree fs-2 text-success"></i>
                             <p class="small mt-2 mb-0">100% Orgánico</p>
                         </div>
                     </div>
