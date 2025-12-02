@@ -72,7 +72,7 @@
             <div class="col-12 col-md-6 col-lg-3">
                 <div class="bg-white p-4 rounded-4 shadow-sm h-100">
                     <div class="icon-square bg-success bg-opacity-10 rounded-3 d-flex justify-content-center align-items-center mb-3" style="width: 70px; height:70px; margin:auto;">
-                        <i class="bi bi-leaf text-success fs-1"></i>
+                        <i class="bi bi-tree fs-2 text-success"></i>
                     </div>
                     <h5>Sostenibilidad</h5>
                     <p class="text-muted">Cuidamos el medio ambiente en cada etapa de producción</p>
@@ -120,7 +120,7 @@
         <div class="row g-4">
 
             <div class="col-md-3">
-                <h2 class="fw-bold display-5">15k+</h2>
+                <h2 class="fw-bold display-5">+10k</h2>
                 <p class="text-white-50">Clientes satisfechos</p>
             </div>
 
@@ -130,12 +130,12 @@
             </div>
 
             <div class="col-md-3">
-                <h2 class="fw-bold display-5">50+</h2>
+                <h2 class="fw-bold display-5">+50</h2>
                 <p class="text-white-50">Agricultores aliados</p>
             </div>
 
             <div class="col-md-3">
-                <h2 class="fw-bold display-5">5+</h2>
+                <h2 class="fw-bold display-5">+5</h2>
                 <p class="text-white-50">Años de experiencia</p>
             </div>
 

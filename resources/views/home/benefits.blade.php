@@ -9,7 +9,7 @@
             <!-- Benefit 1 -->
             <div class="col-12 col-sm-6 col-lg-3">
                 <div class="p-4 bg-white rounded-4 shadow-sm h-100">
-                    <i class="bi bi-leaf text-success fs-1 mb-3"></i>
+                    <i class="bi bi-flower1 text-success fs-1 mb-3"></i>
                     <h5 class="fw-bold">Cosmética Natural</h5>
                     <p class="text-muted small">
                         Productos orgánicos certificados, sin químicos dañinos.

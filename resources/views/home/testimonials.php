@@ -93,7 +93,7 @@
 
                 <div class="text-center">
                     <div class="fs-3">💚</div>
-                    <p class="fw-bold mb-0 text-success">15,000+</p>
+                    <p class="fw-bold mb-0 text-success">+15,000</p>
                     <small class="text-muted">Clientes satisfechos</small>
                 </div>
 
