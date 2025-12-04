@@ -34,7 +34,7 @@
     </div>
 
     {{-- ESTADÍSTICAS --}}
-    <div class="row g-3 mb-4">
+    <div class="row g-2 mb-2">
         <div class="col-md-3">
             <div class="card border-0 shadow-sm rounded-3">
                 <div class="card-body p-3">
@@ -69,12 +69,12 @@
         </div>
     </div>
 
-    {{-- LISTA DE CUPONES CON SCROLL --}}
-    <div class="overflow-auto" style="max-height: 600px;">
-        <div class="row g-3">
+    {{-- LISTA DE CUPONES CON SCROLL SOLO VERTICAL --}}
+    <div style="max-height: 600px; overflow-y: auto; overflow-x: hidden; padding-right: 8px;">
+        <div class="d-grid gap-3" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
 
             @forelse ($cupones as $cupon)
-            <div class="col-md-6 col-lg-4">
+            <div>
                 <div class="card border-0 shadow-sm rounded-4 h-100">
 
                     {{-- Header con Badge --}}

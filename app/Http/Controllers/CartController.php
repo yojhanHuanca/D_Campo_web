@@ -4,11 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\CartItem;
 use App\Models\Producto;
 use App\Models\Cupon;
-use Illuminate\Support\Facades\DB;
-
 
 class CartController extends Controller
 {
@@ -35,27 +34,39 @@ class CartController extends Controller
             'cantidad' => 'required|integer|min:1'
         ]);
 
-        $producto = Producto::find($request->product_id);
+        return DB::transaction(function () use ($request) {
+            $producto = Producto::lockForUpdate()->find($request->product_id);
 
-        // Buscar si ya está en el carrito
-        $item = CartItem::where('user_id', Auth::id())
-            ->where('producto_id', $producto->id) // ← CORREGIDO
-            ->first();
+            if (!$producto) {
+                return back()->with('error', 'Producto no disponible.');
+            }
 
-        if ($item) {
-            // Si ya está, aumentamos la cantidad
-            $item->increment('cantidad', $request->cantidad);
-        } else {
-            // Si no está, lo creamos
-            CartItem::create([
-                'user_id' => Auth::id(),
-                'producto_id' => $producto->id, // ← CORREGIDO
-                'cantidad' => $request->cantidad,
-                'precio_unitario' => $producto->precio,
-            ]);
-        }
+            $item = CartItem::where('user_id', Auth::id())
+                ->where('producto_id', $producto->id)
+                ->lockForUpdate()
+                ->first();
 
-        return redirect()->back()->with('success', 'Producto agregado al carrito.');
+            $cantidadSolicitada = (int) $request->cantidad;
+
+            if ($producto->stock < $cantidadSolicitada) {
+                return back()->with('error', 'Stock insuficiente. Solo quedan ' . $producto->stock . ' unidades.');
+            }
+
+            $producto->decrement('stock', $cantidadSolicitada);
+
+            if ($item) {
+                $item->increment('cantidad', $cantidadSolicitada);
+            } else {
+                CartItem::create([
+                    'user_id' => Auth::id(),
+                    'producto_id' => $producto->id,
+                    'cantidad' => $cantidadSolicitada,
+                    'precio_unitario' => $producto->precio,
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Producto agregado al carrito.');
+        });
     }
 
     // Actualizar cantidad (sumar o restar)
@@ -66,14 +77,33 @@ class CartController extends Controller
             'cantidad' => 'required|integer|min:1'
         ]);
 
-        $item = CartItem::where('id', $request->item_id)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
+        return DB::transaction(function () use ($request) {
+            $item = CartItem::where('id', $request->item_id)
+                ->where('user_id', Auth::id())
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        $item->cantidad = $request->cantidad;
-        $item->save();
+            $producto = Producto::lockForUpdate()->findOrFail($item->producto_id);
 
-        return back();
+            $cantidadActual = $item->cantidad;
+            $cantidadNueva = (int) $request->cantidad;
+
+            if ($cantidadNueva > $cantidadActual) {
+                $diferencia = $cantidadNueva - $cantidadActual;
+                if ($producto->stock < $diferencia) {
+                    return back()->with('error', 'Stock insuficiente. Solo quedan ' . $producto->stock . ' unidades.');
+                }
+                $producto->decrement('stock', $diferencia);
+            } elseif ($cantidadNueva < $cantidadActual) {
+                $devolver = $cantidadActual - $cantidadNueva;
+                $producto->increment('stock', $devolver);
+            }
+
+            $item->cantidad = $cantidadNueva;
+            $item->save();
+
+            return back();
+        });
     }
 
     // Eliminar del carrito
@@ -83,11 +113,22 @@ class CartController extends Controller
             'item_id' => 'required|exists:cart_items,id',
         ]);
 
-        CartItem::where('id', $request->item_id)
-            ->where('user_id', Auth::id())
-            ->delete();
+        return DB::transaction(function () use ($request) {
+            $item = CartItem::where('id', $request->item_id)
+                ->where('user_id', Auth::id())
+                ->lockForUpdate()
+                ->first();
 
-        return back()->with('success', 'Producto eliminado del carrito.');
+            if ($item) {
+                $producto = Producto::lockForUpdate()->find($item->producto_id);
+                if ($producto) {
+                    $producto->increment('stock', $item->cantidad);
+                }
+                $item->delete();
+            }
+
+            return back()->with('success', 'Producto eliminado del carrito.');
+        });
     }
 
     public function aplicarCupon(Request $request)
@@ -135,7 +176,7 @@ class CartController extends Controller
             ]);
         }
     
-        // 🔥 Validar si el usuario YA usó este cupón alguna vez
+        // Validar si el usuario ya lo usó
         $yaUso = DB::table('cupon_usuario')
             ->where('user_id', $user->id)
             ->where('cupon_id', $cupon->id)
@@ -180,5 +221,4 @@ class CartController extends Controller
             'cupon' => $cupon
         ]);
     }
-    
 }

@@ -1,16 +1,6 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalles de pedido</title>
-</head>
-<body>
-    @extends('admin.layout')
+@extends('admin.layout')
 
 @section('content')
-
-{{-- MODAL CON BOOTSTRAP --}}
 <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
      style="background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px); z-index:1050;">
 
@@ -100,33 +90,44 @@
             </div>
 
             {{-- COMPROBANTE DE PAGO --}}
-            @if ($pedido->comprobante)
+            @php
+                $comprobante = $pedido->comprobante ?: ($pedido->pago->comprobante ?? null);
+                $comprobanteUrl = null;
+                if ($comprobante) {
+                    $publicPath = \Illuminate\Support\Facades\Storage::disk('public')->path('comprobantes/' . $comprobante);
+                    if (file_exists($publicPath)) {
+                        $mime = mime_content_type($publicPath);
+                        $base64 = base64_encode(file_get_contents($publicPath));
+                        $comprobanteUrl = "data:{$mime};base64,{$base64}";
+                    } else {
+                        $comprobanteUrl = asset('storage/comprobantes/' . rawurlencode($comprobante));
+                    }
+                }
+            @endphp
+
+            @if ($comprobante)
                 <div class="mb-3">
                     <p class="fw-semibold small mb-1">Comprobante de pago</p>
-
-                    {{-- Probar diferentes rutas donde podría estar guardada la imagen --}}
-                    @if(file_exists(public_path('storage/comprobantes/' . $pedido->comprobante)))
-                        <img src="{{ asset('storage/comprobantes/' . $pedido->comprobante) }}" width="200">
-                             class="rounded border shadow-sm" 
-                             style="width: 100%; max-width: 300px; object-fit: cover;"
-                             alt="Comprobante de pago">
-                    @elseif(file_exists(storage_path('app/public/comprobantes/' . $pedido->comprobante)))
-                        <<img src="{{ asset('storage/comprobantes/' . $pedido->comprobante) }}" width="200">
-                             class="rounded border shadow-sm" 
-                             style="width: 100%; max-width: 300px; object-fit: cover;"
-                             alt="Comprobante de pago">
-                    @else
-                        <div class="alert alert-warning p-2 small">
-                            <i class="bi bi-exclamation-triangle"></i>
-                            
-                            Comprobante encontrado en base de datos pero archivo no encontrado.
-                            <br>
-                            <small>Nombre: {{ $pedido->comprobante }}</small>
-                        </div>
-                    @endif
+                    <img src="{{ $comprobanteUrl }}"
+                         class="rounded border shadow-sm"
+                         style="width: 100%; max-width: 300px; object-fit: cover;"
+                         alt="Comprobante de pago"
+                         onerror="this.onerror=null; this.replaceWith(document.createTextNode('Comprobante no encontrado: {{ $comprobante }}'));"
+                    >
+                    <small class="text-muted d-block mt-1">Archivo: {{ $comprobante }}</small>
                 </div>
             @else
                 <p class="text-muted small">No se subió comprobante.</p>
+            @endif
+
+            @php
+                $codigoOperacion = $pedido->codigo_operacion ?: ($pedido->pago->codigo_operacion ?? null);
+            @endphp
+            @if ($codigoOperacion)
+                <div class="mb-3">
+                    <p class="fw-semibold small mb-1">Código de operación</p>
+                    <p class="mb-0 small">{{ $codigoOperacion }}</p>
+                </div>
             @endif
 
             {{-- Formulario para cambiar estado --}}
@@ -160,8 +161,4 @@
         </div>
     </div>
 </div>
-
 @endsection
-
-</body>
-</html>

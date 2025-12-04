@@ -38,7 +38,8 @@ class CulqiController extends Controller
         $subtotal = $items->sum(fn($item) => $item->producto->precio * $item->cantidad);
         $igv = $subtotal * 0.18;
         $envio = 10;
-        $total = $subtotal + $igv + $envio;
+        $descuento = session('cupon_descuento', 0);
+        $total = ($subtotal + $igv + $envio) - $descuento;
 
         // Realizar el cobro en Culqi API usando la SECRET_KEY
         $secretKey = env('CULQI_SECRET_KEY');

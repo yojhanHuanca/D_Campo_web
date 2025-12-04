@@ -11,108 +11,159 @@
 
 @include('partials.header')
 
+@php
+    // Pega aquí las URLs de las imágenes para cada slide del carrusel
+    $heroImages = $heroImages ?? [
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyjV9fYZ6cYhdGtlUq3-Rcg5BsE8L4_-HCwSu9B2VifudUZvrmLrtEZVs&s',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyjV9fYZ6cYhdGtlUq3-Rcg5BsE8L4_-HCwSu9B2VifudUZvrmLrtEZVs&s',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyjV9fYZ6cYhdGtlUq3-Rcg5BsE8L4_-HCwSu9B2VifudUZvrmLrtEZVs&s',
+    ];
+
+    // Enlace opcional por slide (deja # si solo es imagen)
+    $heroLinks = $heroLinks ?? ['#', '#', '#'];
+@endphp
+
 {{-- HERO CAROUSEL --}}
-<div id="heroCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
-    <div class="carousel-indicators">
-        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
-        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
-        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+<section class="pb-4">
+    <div class="container">
+        <div class="rounded-4 overflow-hidden shadow-sm position-relative">
+            <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+                    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+                    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+                </div>
+                
+                <div class="carousel-inner">
+                    {{-- Slide 1 con enlace --}}
+                    <div class="carousel-item active">
+                        <a href="{{ $heroLinks[0] ?? '#' }}" class="text-decoration-none text-white d-block">
+                            <div class="position-relative hero-slide" style="background-image: url('{{ $heroImages[0] ?? '' }}');">
+                                <div class="hero-overlay"></div>
+                                <div class="hero-content container">
+                                    <div class="row align-items-center">
+                                        <div class="col-lg-6">
+                                            <span class="badge bg-light text-dark px-3 py-2 rounded-pill mb-3 shadow-sm">
+                                                <i class="bi bi-stars me-1 text-success"></i> Productos Destacados
+                                            </span>
+                                            <h1 class="display-4 fw-bold text-white mb-3">Cosmética Natural Premium</h1>
+                                            <p class="lead text-white-50 mb-4">Descubre nuestra colección de productos elaborados con palta 100% orgánica.</p>
+                                            <div class="d-flex gap-2">
+                                                <span class="badge bg-success bg-opacity-75 text-white">Nuevo</span>
+                                                <span class="badge bg-white text-success">Envío en 24h</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    {{-- Slide 2 con enlace --}}
+                    <div class="carousel-item">
+                        <a href="{{ $heroLinks[1] ?? '#' }}" class="text-decoration-none text-white d-block">
+                            <div class="position-relative hero-slide" style="background-image: url('{{ $heroImages[1] ?? '' }}');">
+                                <div class="hero-overlay"></div>
+                                <div class="hero-content container">
+                                    <div class="row align-items-center">
+                                        <div class="col-lg-6">
+                                            <span class="badge bg-light text-dark px-3 py-2 rounded-pill mb-3 shadow-sm">
+                                                <i class="bi bi-droplet-half me-1 text-success"></i> Hidratación pura
+                                            </span>
+                                            <h1 class="display-4 fw-bold text-white mb-3">100% Natural</h1>
+                                            <p class="lead text-white-50 mb-4">Cuidado natural para tu piel con ingredientes de origen sostenible.</p>
+                                            <div class="d-flex gap-2">
+                                                <span class="badge bg-success bg-opacity-75 text-white">Vegano</span>
+                                                <span class="badge bg-white text-success">Sin parabenos</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    {{-- Slide 3 con enlace --}}
+                    <div class="carousel-item">
+                        <a href="{{ $heroLinks[2] ?? '#' }}" class="text-decoration-none text-white d-block">
+                            <div class="position-relative hero-slide" style="background-image: url('{{ $heroImages[2] ?? '' }}');">
+                                <div class="hero-overlay"></div>
+                                <div class="hero-content container">
+                                    <div class="row align-items-center">
+                                        <div class="col-lg-6">
+                                            <span class="badge bg-light text-dark px-3 py-2 rounded-pill mb-3 shadow-sm">
+                                                <i class="bi bi-flower1 me-1 text-success"></i> Fórmula botánica
+                                            </span>
+                                            <h1 class="display-4 fw-bold text-white mb-3">Orgánico Premium</h1>
+                                            <p class="lead text-white-50 mb-4">Lo mejor de la naturaleza para tu rutina diaria de skincare.</p>
+                                            <div class="d-flex gap-2">
+                                                <span class="badge bg-success bg-opacity-75 text-white">Certificado</span>
+                                                <span class="badge bg-white text-success">Hecho en Perú</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                
+                <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+        </div>
     </div>
-    
-    <div class="carousel-inner">
-        <div class="carousel-item active">
-            <div class="position-relative" style="height: 500px; background: linear-gradient(135deg, #8fa88e 0%, #c4b5a0 100%);">
-                {{-- Aquí va tu imagen de fondo --}}
-                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-lg-6 text-white">
-                                <span class="badge bg-white bg-opacity-25 text-white px-3 py-2 rounded-pill mb-3">
-                                    <i class="bi bi-stars me-1"></i> Productos Destacados
-                                </span>
-                                <h1 class="display-3 fw-bold mb-3">Cosmética Natural Premium</h1>
-                                <p class="fs-5 mb-0">Descubre nuestra colección de productos elaborados con palta 100% orgánica</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="carousel-item">
-            <div class="position-relative" style="height: 500px; background: linear-gradient(135deg, #7a9b7e 0%, #d4c39a 100%);">
-                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-lg-6 text-white">
-                                <span class="badge bg-white bg-opacity-25 text-white px-3 py-2 rounded-pill mb-3">
-                                    <i class="bi bi-stars me-1"></i> Productos Destacados
-                                </span>
-                                <h1 class="display-3 fw-bold mb-3">100% Natural</h1>
-                                <p class="fs-5 mb-0">Cuidado natural para tu piel</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="carousel-item">
-            <div class="position-relative" style="height: 500px; background: linear-gradient(135deg, #6c9a78 0%, #c7b597 100%);">
-                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-lg-6 text-white">
-                                <span class="badge bg-white bg-opacity-25 text-white px-3 py-2 rounded-pill mb-3">
-                                    <i class="bi bi-stars me-1"></i> Productos Destacados
-                                </span>
-                                <h1 class="display-3 fw-bold mb-3">Orgánico Premium</h1>
-                                <p class="fs-5 mb-0">Lo mejor de la naturaleza</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon"></span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-        <span class="carousel-control-next-icon"></span>
-    </button>
-</div>
+</section>
 
 <div class="container mb-5">
     
     {{-- BARRA DE BÚSQUEDA --}}
     <div class="row mb-4">
         <div class="col-lg-8 mx-auto">
-            <div class="input-group input-group-lg shadow-sm">
+            <form method="GET" action="{{ route('store.index') }}#productos" class="input-group input-group-lg shadow-sm">
                 <span class="input-group-text bg-white border-end-0">
-                    <i class="bi bi-search text-muted"></i>
+                    <i class="bi bi-search text-success"></i>
                 </span>
-                <input type="text" class="form-control border-start-0 ps-0" placeholder="Buscar productos...">
-            </div>
+                <input type="text"
+                       name="q"
+                       class="form-control border-start-0 ps-0"
+                       placeholder="Buscar productos..."
+                       value="{{ $busqueda ?? '' }}">
+
+                {{-- mantener filtros actuales --}}
+                @if(isset($categoriaId) && $categoriaId !== '')
+                    <input type="hidden" name="categoria" value="{{ $categoriaId }}">
+                @endif
+                @if(isset($orden))
+                    <input type="hidden" name="orden" value="{{ $orden }}">
+                @endif
+                @if(isset($minPrice))
+                    <input type="hidden" name="min_price" value="{{ $minPrice }}">
+                @endif
+                @if(isset($maxPrice))
+                    <input type="hidden" name="max_price" value="{{ $maxPrice }}">
+                @endif
+            </form>
         </div>
     </div>
 
     {{-- FILTROS HORIZONTALES --}}
-    <div class="card border-0 shadow-sm rounded-4 mb-4">
-        <div class="card-body p-4 bg-white">
-            <div class="d-flex align-items-center mb-3">
-                <i class="bi bi-funnel text-success me-2"></i>
-                <h6 class="mb-0 fw-bold">Filtrar productos</h6>
-            </div>
-            
-            <div class="row g-3">
-                {{-- Categoría --}}
-                <div class="col-md-4">
-                    <label class="form-label small fw-semibold text-muted mb-2">Categoría</label>
-                    <form method="GET" action="{{ route('store.index') }}">
+    <div class="row g-3 mb-4">
+        {{-- Categoría --}}
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 filter-card">
+                <div class="card-body p-2">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-success bg-opacity-10 text-success me-2"><i class="bi bi-tag"></i></span>
+                        <h6 class="mb-0 fw-semibold text-muted">Categoría</h6>
+                    </div>
+                    <form method="GET" action="{{ route('store.index') }}#productos">
                         <select name="categoria" class="form-select border-0 bg-light" onchange="this.form.submit()">
-                            <option value="">Todos los productos</option>
+                            <option value="">Todas</option>
                             @foreach ($categorias as $cat)
                                 <option value="{{ $cat->id }}"
                                     {{ isset($categoriaId) && $categoriaId == $cat->id ? 'selected' : '' }}>
@@ -123,27 +174,93 @@
                         @if(isset($busqueda))
                             <input type="hidden" name="q" value="{{ $busqueda }}">
                         @endif
+                        @if(isset($orden))
+                            <input type="hidden" name="orden" value="{{ $orden }}">
+                        @endif
+                        @if(isset($minPrice))
+                            <input type="hidden" name="min_price" value="{{ $minPrice }}">
+                        @endif
+                        @if(isset($maxPrice))
+                            <input type="hidden" name="max_price" value="{{ $maxPrice }}">
+                        @endif
                     </form>
                 </div>
+            </div>
+        </div>
 
-                {{-- Ordenar por --}}
-                <div class="col-md-4">
-                    <label class="form-label small fw-semibold text-muted mb-2">Ordenar por</label>
-                    <select class="form-select border-0 bg-light">
-                        <option selected>Destacados</option>
-                        <option>Precio: Menor a Mayor</option>
-                        <option>Precio: Mayor a Menor</option>
-                    </select>
-                </div>
-
-                {{-- Rango de precio --}}
-                <div class="col-md-4">
-                    <label class="form-label small fw-semibold text-muted mb-2">Rango de precio</label>
-                    <div class="d-flex align-items-center">
-                        <small class="text-muted me-2">S/ 0</small>
-                        <input type="range" class="form-range flex-grow-1" min="0" max="100">
-                        <small class="text-muted ms-2">S/ 100</small>
+        {{-- Ordenar por --}}
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 filter-card">
+                <div class="card-body p-2">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-success bg-opacity-10 text-success me-2"><i class="bi bi-sort-alpha-down"></i></span>
+                        <h6 class="mb-0 fw-semibold text-muted">Ordenar</h6>
                     </div>
+                    <form method="GET" action="{{ route('store.index') }}#productos">
+                        @if(isset($busqueda))
+                            <input type="hidden" name="q" value="{{ $busqueda }}">
+                        @endif
+                        @if(isset($categoriaId) && $categoriaId !== '')
+                            <input type="hidden" name="categoria" value="{{ $categoriaId }}">
+                        @endif
+                        @if(isset($minPrice))
+                            <input type="hidden" name="min_price" value="{{ $minPrice }}">
+                        @endif
+                        @if(isset($maxPrice))
+                            <input type="hidden" name="max_price" value="{{ $maxPrice }}">
+                        @endif
+                        <select name="orden" class="form-select border-0 bg-light" onchange="this.form.submit()">
+                            <option value="" {{ empty($orden) ? 'selected' : '' }}>Destacados</option>
+                            <option value="precio_asc" {{ $orden === 'precio_asc' ? 'selected' : '' }}>Precio: Menor a Mayor</option>
+                            <option value="precio_desc" {{ $orden === 'precio_desc' ? 'selected' : '' }}>Precio: Mayor a Menor</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {{-- Rango de precio --}}
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 filter-card">
+                <div class="card-body p-2">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-success bg-opacity-10 text-success me-2"><i class="bi bi-cash-stack"></i></span>
+                        <h6 class="mb-0 fw-semibold text-muted">Rango de precio</h6>
+                    </div>
+                    <form method="GET" action="{{ route('store.index') }}#productos">
+                        @if(isset($busqueda))
+                            <input type="hidden" name="q" value="{{ $busqueda }}">
+                        @endif
+                        @if(isset($categoriaId) && $categoriaId !== '')
+                            <input type="hidden" name="categoria" value="{{ $categoriaId }}">
+                        @endif
+                        @if(isset($orden))
+                            <input type="hidden" name="orden" value="{{ $orden }}">
+                        @endif
+
+                        <div class="bg-light rounded-3 px-3 py-3 shadow-sm">
+                            <div class="d-flex justify-content-between small text-muted mb-2">
+                                <span>Mín: <strong id="minLabel">S/ {{ $minPrice ?? 0 }}</strong></span>
+                                <span>Máx: <strong id="maxLabel">S/ {{ $maxPrice ?? 500 }}</strong></span>
+                            </div>
+                            <div class="position-relative" style="height: 24px;">
+                                <input id="minRange" type="range" min="0" max="500" step="1"
+                                       value="{{ $minPrice ?? 0 }}"
+                                       class="form-range position-absolute top-0 start-0 w-100" style="pointer-events: auto;">
+                                <input id="maxRange" type="range" min="0" max="500" step="1"
+                                       value="{{ $maxPrice ?? 500 }}"
+                                       class="form-range position-absolute top-0 start-0 w-100" style="pointer-events: auto;">
+                            </div>
+                            <div class="d-flex justify-content-end mt-2">
+                                <button class="btn btn-success btn-sm rounded-pill px-3" type="submit">
+                                    <i class="bi bi-funnel me-1"></i>Aplicar
+                                </button>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="min_price" id="minPriceInput" value="{{ $minPrice ?? 0 }}">
+                        <input type="hidden" name="max_price" id="maxPriceInput" value="{{ $maxPrice ?? 500 }}">
+                    </form>
                 </div>
             </div>
         </div>
@@ -155,28 +272,23 @@
     </p>
 
     {{-- GRID DE PRODUCTOS --}}
-    <div class="row g-4">
+    <div id="productos" class="row g-4">
         @forelse ($productos as $producto)
             <div class="col-lg-3 col-md-4 col-sm-6">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 position-relative product-card">
-                    
-                    {{-- ICONOS QUE APARECEN AL HACER HOVER --}}
-                    <div class="position-absolute top-0 end-0 m-3 d-flex flex-column gap-2 product-icons" style="z-index: 10; opacity: 0; transition: opacity 0.3s;">
-                        <button class="btn btn-white btn-sm rounded-circle shadow d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                            <i class="bi bi-heart"></i>
+                <div class="product-card card border-0 shadow-sm rounded-4 overflow-hidden h-100 position-relative bg-white">
+                    <div class="position-absolute top-0 end-0 m-3 d-flex flex-column gap-2 product-icons">
+                        <button class="btn btn-white btn-sm rounded-circle shadow d-flex align-items-center justify-content-center">
+                            <i class="bi bi-heart text-danger"></i>
                         </button>
-                        <a href="{{ route('store.show', $producto->id) }}" class="btn btn-white btn-sm rounded-circle shadow d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                            <i class="bi bi-eye"></i>
+                        <a href="{{ route('store.show', $producto->id) }}" class="btn btn-white btn-sm rounded-circle shadow d-flex align-items-center justify-content-center">
+                            <i class="bi bi-eye text-success"></i>
                         </a>
                     </div>
 
-                    {{-- Imagen (clickable) --}}
                     <a href="{{ route('store.show', $producto->id) }}" class="text-decoration-none">
-                        <div style="height: 280px; overflow: hidden; cursor: pointer;">
+                        <div class="product-image">
                             @if($producto->imagen)
-                                <img src="{{ asset('storage/' . $producto->imagen) }}"
-                                     class="w-100 h-100 object-fit-cover"
-                                     alt="{{ $producto->nombre }}">
+                                <img src="{{ asset('storage/' . $producto->imagen) }}" class="w-100 h-100 object-fit-cover" alt="{{ $producto->nombre }}">
                             @else
                                 <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center">
                                     <i class="bi bi-image text-muted fs-1"></i>
@@ -185,37 +297,44 @@
                         </div>
                     </a>
 
-                    {{-- BOTÓN AGREGAR QUE APARECE AL HOVER --}}
-                    <div class="position-absolute bottom-0 start-0 end-0 p-3 product-add-btn" style="opacity: 0; transition: opacity 0.3s; z-index: 20;">
-                        <form action="{{ route('cart.add') }}" method="POST" onclick="event.stopPropagation();">
+                    <div class="position-absolute bottom-0 start-0 end-0 p-3 product-add-btn">
+                        <form action="{{ route('cart.add') }}" method="POST" onclick="event.stopPropagation();" class="remember-scroll">
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $producto->id }}">
                             <input type="hidden" name="cantidad" value="1">
-                            <button type="submit" class="btn btn-light w-100 rounded-pill shadow" onclick="event.stopPropagation();">
-                                <i class="bi bi-cart-plus me-2"></i>Agregar
-                            </button>
+                            @if(($producto->stock ?? 0) > 0)
+                                <button type="submit" class="btn btn-success w-100 rounded-pill shadow">
+                                    <i class="bi bi-cart-plus me-2"></i>Agregar
+                                </button>
+                            @else
+                                <button type="button" class="btn btn-secondary w-100 rounded-pill shadow disabled">
+                                    <i class="bi bi-x-circle me-2"></i>Sin stock
+                                </button>
+                            @endif
                         </form>
                     </div>
 
                     <div class="card-body p-3">
-                        {{-- Rating --}}
-                        <div class="mb-2">
-                            <i class="bi bi-star-fill text-warning small"></i>
-                            <small class="text-muted ms-1">4.{{ rand(5,9) }}</small>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="text-warning small d-flex align-items-center gap-1">
+                                <i class="bi bi-star-fill"></i>
+                                <span class="text-muted">4.{{ rand(5,9) }}</span>
+                            </div>
+                            @if(($producto->stock ?? 0) > 0)
+                                <span class="badge bg-success bg-opacity-10 text-success">Stock: {{ $producto->stock }}</span>
+                            @else
+                                <span class="badge bg-danger bg-opacity-10 text-danger">Agotado</span>
+                            @endif
                         </div>
 
-                        {{-- Nombre --}}
-                        <h6 class="fw-bold mb-2">{{ $producto->nombre }}</h6>
-
-                        {{-- Descripción --}}
+                        <h6 class="fw-bold mb-1">{{ $producto->nombre }}</h6>
                         <p class="text-muted small mb-3" style="height: 40px; overflow: hidden;">
                             {{ Str::limit($producto->descripcion, 60) }}
                         </p>
 
-                        {{-- Precio --}}
-                        <h5 class="fw-bold text-dark mb-0">
-                            S/ {{ number_format($producto->precio, 2) }}
-                        </h5>
+                        <div class="d-flex align-items-center">
+                            <h5 class="fw-bold text-dark mb-0">S/ {{ number_format($producto->precio, 2) }}</h5>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -254,8 +373,110 @@ document.addEventListener('DOMContentLoaded', function() {
             if (addBtn) addBtn.style.opacity = '0';
         });
     });
+
+    // Slider doble para rango de precios
+    const minRange = document.getElementById('minRange');
+    const maxRange = document.getElementById('maxRange');
+    const minLabel = document.getElementById('minLabel');
+    const maxLabel = document.getElementById('maxLabel');
+    const minInput = document.getElementById('minPriceInput');
+    const maxInput = document.getElementById('maxPriceInput');
+
+    if (minRange && maxRange) {
+        const updateRanges = () => {
+            let minVal = parseInt(minRange.value, 10);
+            let maxVal = parseInt(maxRange.value, 10);
+
+            if (minVal > maxVal) {
+                // Evita cruce: empuja el mayor
+                maxVal = minVal;
+                maxRange.value = maxVal;
+            }
+
+            minLabel.textContent = `S/ ${minVal}`;
+            maxLabel.textContent = `S/ ${maxVal}`;
+            minInput.value = minVal;
+            maxInput.value = maxVal;
+        };
+
+        minRange.addEventListener('input', updateRanges);
+        maxRange.addEventListener('input', updateRanges);
+        updateRanges();
+    }
+
+    // Recordar posición al enviar formularios (evita salto al top tras recarga)
+    const rememberForms = document.querySelectorAll('form.remember-scroll');
+    rememberForms.forEach(form => {
+        form.addEventListener('submit', () => {
+            sessionStorage.setItem('scrollPos', window.scrollY.toString());
+        });
+    });
+
+    const savedPos = sessionStorage.getItem('scrollPos');
+    if (savedPos) {
+        window.scrollTo({ top: parseInt(savedPos, 10), behavior: 'auto' });
+        sessionStorage.removeItem('scrollPos');
+    }
 });
 </script>
+
+{{-- ESTILOS ADICIONALES --}}
+<style>
+    .hero-slide {
+        min-height: 420px;
+        background-size: cover;
+        background-position: center;
+    }
+    .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, rgba(27,94,32,0.65), rgba(27,94,32,0.35));
+    }
+    .hero-content {
+        position: relative;
+        padding: 80px 0;
+    }
+    .product-card {
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .product-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 45px rgba(0,0,0,0.08);
+    }
+    .product-image {
+        height: 230px;
+        overflow: hidden;
+    }
+    .product-icons,
+    .product-add-btn {
+        opacity: 0;
+        transition: opacity .25s ease;
+        z-index: 10;
+    }
+    .product-card:hover .product-icons,
+    .product-card:hover .product-add-btn {
+        opacity: 1;
+    }
+    .product-icons button,
+    .product-icons a {
+        width: 42px;
+        height: 42px;
+    }
+    .filter-card .card-body {
+        padding: 0.6rem 0.8rem !important;
+    }
+    .filter-card h6 {
+        font-size: 0.9rem;
+    }
+    .filter-card .form-select,
+    .filter-card .bg-light {
+        min-height: 38px;
+        font-size: 0.9rem;
+    }
+    .filter-card .bg-light {
+        padding: 0.45rem;
+    }
+</style>
 
 </body>
 </html>

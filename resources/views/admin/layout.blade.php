@@ -83,6 +83,12 @@
                     <i class="bi bi-ticket-perforated me-3"></i>
                     <span>Cupones</span>
                 </a>
+
+                <a href="{{ route('admin.soporte.index') }}" 
+                    class="d-flex align-items-center text-decoration-none text-dark px-3 py-2 rounded mb-1 hover-item">
+                    <i class="bi bi-headset me-3"></i>
+                    <span>Soporte</span>
+                </a>
             </nav>
 
             {{-- Botón Cerrar Sesión (al final del sidebar) --}}
