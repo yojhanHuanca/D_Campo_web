@@ -19,6 +19,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\CulqiController;
+use App\Http\Controllers\Admin\AdminSoporteController;
 
 
 
@@ -80,12 +81,18 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/admin/resenas/{id}', [ResenaAdminController::class, 'eliminar'])->name('admin.resenas.eliminar');
 
     //  cupones 
-    Route::resource('cupones', CuponController::class)
+Route::resource('cupones', CuponController::class)
         ->names('admin.cupones');
 
-    // Activar / desactivar cupón
-    Route::patch('cupones/{id}/toggle', [CuponController::class, 'toggleActivo'])
+// Activar / desactivar cupón
+Route::patch('cupones/{id}/toggle', [CuponController::class, 'toggleActivo'])
         ->name('admin.cupones.toggle');
+
+// SOPORTE / ASESORÍA
+Route::get('/admin/soporte', [AdminSoporteController::class, 'index'])->name('admin.soporte.index');
+Route::get('/admin/soporte/{id}', [AdminSoporteController::class, 'show'])->name('admin.soporte.show');
+Route::post('/admin/soporte/{id}', [AdminSoporteController::class, 'responder'])->name('admin.soporte.responder');
+Route::post('/admin/soporte/{id}/ia', [AdminSoporteController::class, 'generarIA'])->name('admin.soporte.ia');
         
 });
 
@@ -215,6 +222,8 @@ Route::middleware('auth')->group(function () {
     // Enviar consulta de soporte
     Route::post('/perfil/asesoria', [PerfilController::class, 'enviarConsulta'])
         ->name('perfil.asesoria.enviar');
+    Route::post('/perfil/asesoria/{id}/respuesta', [PerfilController::class, 'responderConsulta'])
+        ->name('perfil.asesoria.responder');
 
 
 

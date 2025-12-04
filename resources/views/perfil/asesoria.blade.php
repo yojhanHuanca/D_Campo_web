@@ -202,6 +202,108 @@
                 </div>
             </div>
 
+            {{-- CHAT DE CONSULTAS --}}
+            <div class="row g-3 mb-3">
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-3">
+                            <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                                <i class="bi bi-list text-success"></i>
+                                Tus consultas
+                            </h6>
+                            <div class="list-group list-group-flush" style="max-height: 420px; overflow-y: auto;">
+                                @forelse($consultas as $consulta)
+                                    <a href="{{ route('perfil.asesoria', ['consulta' => $consulta->id]) }}"
+                                       class="list-group-item list-group-item-action border-0 rounded-3 mb-2 {{ isset($consultaActiva) && $consultaActiva->id === $consulta->id ? 'bg-success bg-opacity-10' : 'bg-light' }}">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <div class="fw-semibold small">{{ $consulta->asunto }}</div>
+                                                <small class="text-muted">{{ ucfirst($consulta->categoria) }}</small>
+                                            </div>
+                                            <small class="text-muted">{{ $consulta->created_at?->format('d/m') }}</small>
+                                        </div>
+                                        <div class="mt-1">
+                                            @if($consulta->estado === 'respondido')
+                                                <span class="badge bg-success-subtle text-success rounded-pill">Respondido</span>
+                                            @else
+                                                <span class="badge bg-warning-subtle text-warning rounded-pill">Pendiente</span>
+                                            @endif
+                                        </div>
+                                    </a>
+                                @empty
+                                    <p class="text-muted small mb-0">Aún no tienes consultas.</p>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-3 d-flex flex-column" style="height: 100%;">
+                            <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                                <i class="bi bi-chat-dots text-success"></i>
+                                Chat de soporte
+                            </h6>
+
+                            @if(isset($consultaActiva))
+                                <div class="mb-2">
+                                    <div class="fw-semibold">{{ $consultaActiva->asunto }}</div>
+                                    <small class="text-muted">{{ ucfirst($consultaActiva->categoria) }} · {{ $consultaActiva->created_at?->format('d/m/Y H:i') }}</small>
+                                </div>
+
+                                <div class="border rounded-4 p-3 mb-3 bg-light" style="flex: 1; overflow-y: auto; max-height: 360px;">
+                                    {{-- Mensaje inicial --}}
+                                    <div class="d-flex gap-2 align-items-start mb-3">
+                                        <div class="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width:34px;height:34px;">
+                                            <i class="bi bi-person text-success"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold">Tú</div>
+                                            <small class="text-muted d-block">{{ $consultaActiva->created_at?->format('d/m/Y H:i') }}</small>
+                                            <div class="mt-1 p-2 rounded-3" style="background:#e5f9ec;">{{ $consultaActiva->mensaje }}</div>
+                                        </div>
+                                    </div>
+
+                                    {{-- Respuestas --}}
+                                    @forelse($consultaActiva->respuestas as $respuesta)
+                                        <div class="d-flex gap-2 align-items-start mb-3 {{ $respuesta->origen === 'usuario' ? 'flex-row-reverse text-end' : '' }}">
+                                            <div class="{{ $respuesta->origen === 'usuario' ? 'bg-success' : 'bg-primary' }} bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width:34px;height:34px;">
+                                                <i class="{{ $respuesta->origen === 'usuario' ? 'bi bi-person text-success' : 'bi bi-headset text-primary' }}"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-semibold">
+                                                    {{ $respuesta->origen === 'usuario' ? 'Tú' : 'Soporte' }}
+                                                    <small class="text-muted">{{ $respuesta->created_at?->format('d/m/Y H:i') }}</small>
+                                                </div>
+                                                <div class="mt-1 p-2 rounded-3 {{ $respuesta->origen === 'usuario' ? 'bg-success bg-opacity-10' : 'bg-white shadow-sm' }}">
+                                                    {{ $respuesta->contenido }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <p class="text-muted small mb-0">Aún no hay respuesta. Te avisaremos pronto.</p>
+                                    @endforelse
+                                </div>
+
+                                {{-- Input de chat --}}
+                                <form action="{{ route('perfil.asesoria.responder', $consultaActiva->id) }}" method="POST">
+                                    @csrf
+                                    <div class="input-group">
+                                        <input type="text" name="mensaje" class="form-control rounded-start-4" placeholder="Escribe tu mensaje..." required>
+                                        <button class="btn btn-success rounded-end-4" type="submit">
+                                            <i class="bi bi-send"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                            @else
+                                <p class="text-muted small">Aún no tienes consultas. Envía una para iniciar el chat.</p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- PREGUNTAS FRECUENTES --}}
             <div class="card border-0 shadow-sm rounded-4 mb-3">
                 <div class="card-body p-3">

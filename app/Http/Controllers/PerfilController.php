@@ -8,6 +8,7 @@ use App\Models\Pedido;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use App\Models\ConsultaSoporte;
+use App\Models\RespuestaSoporte;
 
 
 class PerfilController extends Controller
@@ -82,11 +83,24 @@ class PerfilController extends Controller
         return back()->with('success', 'Contraseña actualizada correctamente.');
     }
 
-    public function asesoria()
+    public function asesoria(Request $request)
     {
         $user = Auth::user();
+
+        $consultas = ConsultaSoporte::with(['respuestas.user'])
+            ->where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $consultaActiva = null;
+        if ($consultas->isNotEmpty()) {
+            $consultaActiva = $consultas->firstWhere('id', $request->query('consulta'));
+            if (!$consultaActiva) {
+                $consultaActiva = $consultas->first();
+            }
+        }
     
-        return view('perfil.asesoria', compact('user'));
+        return view('perfil.asesoria', compact('user', 'consultas', 'consultaActiva'));
     }
     
     public function enviarConsulta(Request $request)
@@ -108,6 +122,29 @@ class PerfilController extends Controller
         ]);
     
         return back()->with('success', 'Tu consulta fue enviada. Te responderemos lo antes posible.');
+    }
+
+    public function responderConsulta(Request $request, $id)
+    {
+        $request->validate([
+            'mensaje' => 'required|string|max:1000',
+        ]);
+
+        $consulta = ConsultaSoporte::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        RespuestaSoporte::create([
+            'consulta_soporte_id' => $consulta->id,
+            'user_id'             => Auth::id(),
+            'origen'              => 'usuario',
+            'contenido'           => $request->mensaje,
+        ]);
+
+        $consulta->estado = 'pendiente';
+        $consulta->save();
+
+        return back()->with('success', 'Mensaje enviado al soporte.');
     }
     
     

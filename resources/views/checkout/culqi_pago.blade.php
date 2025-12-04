@@ -4,14 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Pagar con Tarjeta - D'Campo</title>
-
-    {{-- Bootstrap --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
-
-    {{-- Culqi --}}
     <script src="https://checkout.culqi.com/js/v4"></script>
-
     <style>
         body {
             background: rgba(0, 0, 0, 0.65);
@@ -22,7 +17,6 @@
             margin: 0;
             padding: 20px;
         }
-
         .modal-pago {
             background: #ffffff;
             width: 100%;
@@ -32,18 +26,10 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             animation: abrir 0.25s ease-out;
         }
-
         @keyframes abrir {
-            from {
-                transform: scale(0.85);
-                opacity: 0;
-            }
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
-
         .btn-pagar {
             width: 100%;
             background: #198754;
@@ -54,22 +40,12 @@
             border: none;
             transition: all 0.3s ease;
         }
-
-        .btn-pagar:hover {
-            background: #157347;
-            transform: translateY(-1px);
-        }
-
-        .btn-pagar:disabled {
-            background: #6c757d;
-            transform: none;
-        }
+        .btn-pagar:hover { background: #157347; transform: translateY(-1px); }
+        .btn-pagar:disabled { background: #6c757d; transform: none; }
     </style>
 </head>
-
 <body>
     <div class="modal-pago">
-        {{-- Header --}}
         <div class="text-center mb-4">
             <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
                 style="width: 60px; height: 60px">
@@ -81,14 +57,10 @@
                 <span class="fw-bold text-dark">S/ {{ number_format($total, 2) }}</span>
             </p>
         </div>
-
-        {{-- Cancelar --}}
         <a href="javascript:window.close()" class="btn btn-outline-secondary w-100">
             <i class="bi bi-arrow-left me-2"></i>
             Cancelar
         </a>
-
-        {{-- Seguridad --}}
         <div class="text-center mt-4">
             <small class="text-muted">
                 <i class="bi bi-shield-check me-1"></i>
@@ -98,12 +70,10 @@
     </div>
 
     <script>
-    // PUBLIC KEY from .env
     Culqi.publicKey = "{{ env('CULQI_PUBLIC_KEY') }}";
 
-    // Abrir Culqi AUTOMÁTICAMENTE al cargar
     document.addEventListener('DOMContentLoaded', function() {
-        // Ocultar el contenido y mostrar solo loading
+        // Mostrar loading mientras se abre Culqi
         document.querySelector('.modal-pago').innerHTML = `
             <div class="text-center">
                 <div class="spinner-border text-success mb-3" role="status">
@@ -121,57 +91,75 @@
 
         Culqi.settings({
             title: "D'Campo",
-            currency: "PEN", 
+            currency: "PEN",
             amount: {{ intval($total * 100) }},
             email: "{{ auth()->user()->email }}",
         });
 
-        // Abrir formulario Culsi automáticamente
         setTimeout(() => {
             Culqi.open();
-        }, 1000);
+        }, 400);
     });
 
-    <script>
-function culqi() {
-    if (Culqi.token) {
+    function enviarTokenCulqi(tokenId) {
+        try { Culqi.close(); } catch (e) {}
 
-        // Token generado por Culqi
-        const token = Culqi.token.id;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{{ route('culqi.pagar') }}";
 
-        // Enviar token a Laravel
-        fetch("{{ route('culqi.token') }}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-            },
-            body: JSON.stringify({ token })
-        })
-        .then(res => res.json())
-        .then(data => {
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = '_token';
+        csrf.value = "{{ csrf_token() }}";
+        form.appendChild(csrf);
 
-            if (data.success) {
-                // Redirigir al RESUMEN
-                if (window.opener && !window.opener.closed) {
-                    window.opener.location.href = "{{ route('checkout.resumen') }}";
-                }
-                window.close();
-            } else {
-                alert("Error en pago: " + data.message);
-            }
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = 'token';
+        tokenInput.value = tokenId;
+        form.appendChild(tokenInput);
 
-        })
-        .catch(() => {
-            alert("Error al procesar pago");
-        });
-
-    } else {
-        alert(Culqi.error.user_message || "No se pudo procesar el pago");
+        document.body.appendChild(form);
+        form.submit();
     }
-}
-</script>
 
+    // Enviar token a Laravel para cobrar y marcar pagado
+    Culqi.on('token', function (token) {
+        enviarTokenCulqi(token.id);
+    });
 
+    // Fallback por si Culqi llama a la función global culqi()
+    window.culqi = function () {
+        if (Culqi.token) {
+            enviarTokenCulqi(Culqi.token.id);
+        } else if (Culqi.error) {
+            alert(Culqi.error.user_message || 'No se pudo procesar el pago');
+            try { Culqi.close(); } catch (e) {}
+            window.close();
+        }
+    };
+
+    Culqi.on('error', function (error) {
+        alert(error.user_message || 'No se pudo procesar el pago');
+        window.close();
+    });
+
+    // Si el usuario cierra la X del modal Culqi, salir del popup
+    Culqi.on('close', function () {
+        const modal = document.querySelector('.modal-pago');
+        if (modal) {
+            modal.innerHTML = `
+                <div class="text-center">
+                    <i class="bi bi-x-circle text-danger fs-1 mb-3"></i>
+                    <h5 class="mb-2">Pago cancelado</h5>
+                    <p class="text-muted mb-3">Cerraste la ventana de Culqi.</p>
+                    <a href="{{ route('checkout.pago') }}" class="btn btn-outline-secondary w-100">Volver al pago</a>
+                </div>
+            `;
+        }
+        setTimeout(() => window.close(), 500);
+    });
+    </script>
 </body>
 </html>

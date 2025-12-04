@@ -327,6 +327,11 @@
             if (cards[metodo]) cards[metodo].classList.remove('d-none');
 
             mensajeInicial.classList.add('d-none');
+
+            // Si el usuario elige tarjeta, abrir Culqi de inmediato
+            if (metodo === 'tarjeta') {
+                lanzarCulqi();
+            }
         });
     });
 
@@ -346,55 +351,78 @@
         if (metodoSeleccionado === 'tarjeta') {
             e.preventDefault();  // No mandamos el form a Laravel todavía
 
-            Culqi.options({
-                lang: "es",
-                modal: true,
-                installments: false
-            });
-
-            Culqi.settings({
-                title: "D'Campo",
-                currency: "PEN",
-                amount: {{ intval($total * 100) }},          // Monto en centavos
-                email: "{{ auth()->user()->email }}"
-            });
-
-            Culqi.open();
+            lanzarCulqi();
         }
     });
+
+    let culqiConfigurado = false;
+    function configurarCulqi() {
+        if (culqiConfigurado) return;
+        Culqi.options({
+            lang: "es",
+            modal: true,
+            installments: false
+        });
+
+        Culqi.settings({
+            title: "D'Campo",
+            currency: "PEN",
+            amount: {{ intval($total * 100) }},          // Monto en centavos
+            email: "{{ auth()->user()->email }}"
+        });
+
+        culqiConfigurado = true;
+    }
+
+    function lanzarCulqi() {
+        configurarCulqi();
+        Culqi.open();
+    }
 
     // Cuando Culqi genera el token correctamente
-    Culqi.on('token', async function (token) {
-        try {
-            const res = await fetch("{{ route('culqi.token') }}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                },
-                body: JSON.stringify({
-                    token: token.id
-                })
-            });
+    function enviarTokenCulqi(tokenId) {
+        try { Culqi.close(); } catch (e) {}
 
-            const data = await res.json();
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{{ route('culqi.pagar') }}";
 
-            if (data.success) {
-                // Ir al RESUMEN
-                window.location.href = "{{ route('checkout.resumen') }}";
-            } else {
-                alert(data.message || 'No se pudo registrar el pago.');
-            }
-        } catch (error) {
-            console.error(error);
-            alert('Error al procesar el pago.');
-        }
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = '_token';
+        csrf.value = "{{ csrf_token() }}";
+        form.appendChild(csrf);
+
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = 'token';
+        tokenInput.value = tokenId;
+        form.appendChild(tokenInput);
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    Culqi.on('token', function (token) {
+        enviarTokenCulqi(token.id);
     });
+
+    // Callback global que Culqi v4 llama tras tokenizar
+    window.culqi = function () {
+        if (Culqi.token) {
+            enviarTokenCulqi(Culqi.token.id);
+        } else if (Culqi.error) {
+            alert(Culqi.error.user_message || 'Error en Culqi, intenta nuevamente.');
+            try { Culqi.close(); } catch (e) {}
+        }
+    };
 
     // Si Culqi devuelve error antes de tokenizar
     Culqi.on('error', function (error) {
         alert(error.user_message || 'Error en Culqi, intenta nuevamente.');
     });
+
+    // Al elegir tarjeta se abre Culqi (sin esperar a "Revisar pedido")
 </script>
 
 

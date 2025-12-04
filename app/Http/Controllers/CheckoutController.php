@@ -12,6 +12,7 @@ use App\Models\Pedido;
 use App\Models\PedidoItem;
 use Illuminate\Support\Facades\Log;
 use App\Models\Cupon;
+use Illuminate\Support\Facades\Storage;
 
 
 class CheckoutController extends Controller
@@ -43,6 +44,24 @@ class CheckoutController extends Controller
         return view('checkout.envio', compact(
             'items', 'subtotal', 'igv', 'envio', 'total', 'direccion'
         ));
+    }
+
+    // ============================
+    //   VISTA POPUP CULQI (FALLBACK)
+    // ============================
+    public function culqiForm(Request $request)
+    {
+        $user = Auth::user();
+        $total = $request->query('total', session('monto_tarjeta', 0));
+
+        if (!$user) {
+            return redirect()->route('auth.login.form')
+                ->with('error', 'Debes iniciar sesiÃ³n para pagar.');
+        }
+
+        return view('checkout.culqi_pago', [
+            'total' => $total,
+        ]);
     }
 
     // ============================
@@ -115,12 +134,15 @@ class CheckoutController extends Controller
         $subtotal = $items->sum(fn($item) => $item->producto->precio * $item->cantidad);
         $igv = $subtotal * 0.18;
         $envio = 10;
-        $total = $subtotal + $igv + $envio;
+        $descuento = session('cupon_descuento', 0);
+        $total = ($subtotal + $igv + $envio) - $descuento;
 
         $nombreComprobante = null;
         if ($request->hasFile('comprobante')) {
+            Storage::disk('public')->makeDirectory('comprobantes');
             $nombreComprobante = time() . '_' . $request->file('comprobante')->getClientOriginalName();
-            $request->file('comprobante')->storeAs('public/comprobantes', $nombreComprobante);
+            // Guardar siempre en el disco público (accessible vía /storage/comprobantes)
+            $request->file('comprobante')->storeAs('comprobantes', $nombreComprobante, 'public');
         }
 
         $codigoSeguimiento = 'DC-' . rand(100000, 999999);
@@ -130,7 +152,8 @@ class CheckoutController extends Controller
         if ($request->metodo_pago === 'tarjeta') {
             // Guardamos el monto antes de Culqi
             session(['monto_tarjeta' => $total]);
-            return redirect()->route('culqi.pagar.form', ['total' => $total]);
+            return redirect()->route('checkout.pago')
+                ->with('info', 'Abre la ventana de Culqi para completar el pago con tarjeta.');
         }
         
 
@@ -209,11 +232,12 @@ class CheckoutController extends Controller
         ], 422);
     }
 
-    // 3. Calcular totales
+    // 3. Calcular totales (aplicando cupón si existe)
     $subtotal = $items->sum(fn($item) => $item->producto->precio * $item->cantidad);
     $igv      = $subtotal * 0.18;
     $envio    = 10;
-    $total    = $subtotal + $igv + $envio;
+    $descuento = session('cupon_descuento', 0);
+    $total    = ($subtotal + $igv + $envio) - $descuento;
 
     // 4. Crear registro de pago (simulando pago aprobado)
     $pago = Pago::create([
@@ -284,43 +308,45 @@ class CheckoutController extends Controller
             $subtotal = $items->sum(fn($i) => $i->producto->precio * $i->cantidad);
             $igv = $subtotal * 0.18;
             $envio = 10;
-            $total = $subtotal + $igv + $envio;
+            $descuento = session('cupon_descuento', 0);
+            $total = ($subtotal + $igv + $envio) - $descuento;
     
             // Guardar comprobante si existe
             $comprobantePath = null;
     
             if ($request->hasFile('comprobante')) {
+                Storage::disk('public')->makeDirectory('comprobantes');
                 $comprobantePath = $request->file('comprobante')->store('comprobantes', 'public');
-    
+            }
+
             // GUARDAR EN DB
             $pago = Pago::create([
                 'user_id'            => $user->id,
                 'direccion_envio_id' => $direccion_envio_id,
                 'metodo_pago'        => $request->metodo_pago,
                 'monto'              => $total,
-    
+
                 // Tarjeta
                 'numero_tarjeta'     => $request->numero_tarjeta,
                 'nombre_titular'     => $request->nombre_titular,
                 'vencimiento'        => $request->vencimiento,
                 'cvv'                => $request->cvv,
-    
+
                 // Yape / Plin
                 'codigo_operacion'   => $request->codigo_operacion,
-    
+
                 // Comprobante
                 'comprobante'        => $comprobantePath,
-    
+
                 // Estado
                 'estado'             => $request->metodo_pago === 'tarjeta' ? 'pagado' : 'pendiente',
             ]);
-    
+
             session(['pago_id' => $pago->id]);
-    
+
             return redirect()->route('checkout.resumen')
                 ->with('success', 'Pago realizado correctamente.');
         }
-    }
     // RESUNEN DE PEDIDO
    public function resumen()
     {
@@ -416,6 +442,7 @@ class CheckoutController extends Controller
         $codigo = 'DC-' . rand(100000, 999999);
     
         // 5. Crear el pedido
+        $pago = Pago::find($pago_id);
         $pedido = Pedido::create([
             'user_id'             => $user->id,
             'pago_id'             => $pago_id,
@@ -431,7 +458,10 @@ class CheckoutController extends Controller
             'igv'                 => $igv,
             'envio'               => $envio,
             'total'               => $total,
-            'estado'              => 'pendiente'
+            'estado'              => 'pendiente',
+            'comprobante'         => $pago?->comprobante,
+            'codigo_operacion'    => $pago?->codigo_operacion,
+            'metodo_pago'         => $pago?->metodo_pago,
         ]);
 
         

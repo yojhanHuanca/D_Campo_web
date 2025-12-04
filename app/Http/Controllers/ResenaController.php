@@ -37,21 +37,21 @@ class ResenaController extends Controller
 
     // REPORTAR RESEÑA
     public function reportar(Request $request, $id)
-{
-    $request->validate([
-        'motivo' => 'required|string|max:500',
-    ]);
-
-    $resena = Resena::findOrFail($id);
-
-    $resena->update([
-        'estado' => 'reportada',
-        'motivo_reporte' => $request->motivo,
-    ]);
-
-    return back()->with('success', 'Reporte enviado correctamente.');
-}
-
+    {
+        $request->validate([
+            'motivo' => 'required|string|max:500',
+        ]);
+    
+        $resena = Resena::findOrFail($id);
+    
+        $resena->update([
+            'estado' => 'reportada',
+            'motivo_reporte' => $request->motivo,
+        ]);
+    
+        return back()->with('success', 'Reporte enviado correctamente.');
+    }
+    
 
     
 }

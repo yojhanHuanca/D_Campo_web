@@ -13,6 +13,9 @@ class StoreController extends Controller
         $busqueda = $request->input('q');
 
         $categoriaId = $request->input('categoria');
+        $orden = $request->input('orden'); // precio_asc | precio_desc
+        $minPrice = $request->input('min_price');
+        $maxPrice = $request->input('max_price');
 
         $categorias = Categoria::all();
 
@@ -28,13 +31,32 @@ class StoreController extends Controller
             $query->where('categoria_id', $categoriaId);
         }
 
+        if ($minPrice !== null && is_numeric($minPrice)) {
+            $query->where('precio', '>=', (float) $minPrice);
+        }
+
+        if ($maxPrice !== null && is_numeric($maxPrice)) {
+            $query->where('precio', '<=', (float) $maxPrice);
+        }
+
+        if ($orden === 'precio_asc') {
+            $query->orderBy('precio', 'asc');
+        } elseif ($orden === 'precio_desc') {
+            $query->orderBy('precio', 'desc');
+        } else {
+            $query->latest(); // destacados por defecto
+        }
+
         $productos = $query->get();
 
         return view('tienda.index', compact(
             'productos',
             'busqueda',
             'categorias',
-            'categoriaId'
+            'categoriaId',
+            'orden',
+            'minPrice',
+            'maxPrice'
         ));
     }
 
