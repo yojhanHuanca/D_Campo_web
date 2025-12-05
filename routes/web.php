@@ -28,7 +28,6 @@ use App\Http\Controllers\Admin\AdminSoporteController;
 // Ruta principal del Home
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-
 // AUTENTICACIÓN
 Route::get('/registro', [AuthController::class, 'showRegisterForm'])->name('auth.register.form');
 Route::post('/registro', [AuthController::class, 'register'])->name('auth.register');
@@ -112,6 +111,8 @@ Route::middleware('auth')->group(function () {
 // TIENDA
 Route::get('/tienda', [StoreController::class, 'index'])->name('store.index');
 Route::get('/producto/{id}', [StoreController::class, 'show'])->name('store.show');
+Route::post('/producto/{id}/chat', [StoreController::class, 'chatProducto'])->name('store.chat');
+Route::post('/tienda/chat', [StoreController::class, 'chatCatalogo'])->name('store.chat.catalogo');
 // Guardar una reseña
 Route::post('/producto/{productoId}/resena', [ResenaController::class, 'store'])
     ->middleware('auth')
@@ -224,7 +225,5 @@ Route::middleware('auth')->group(function () {
         ->name('perfil.asesoria.enviar');
     Route::post('/perfil/asesoria/{id}/respuesta', [PerfilController::class, 'responderConsulta'])
         ->name('perfil.asesoria.responder');
-
-
 
 });

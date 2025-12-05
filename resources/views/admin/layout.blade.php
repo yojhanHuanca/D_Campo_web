@@ -61,9 +61,9 @@
 
 
                 <a href="{{ route('admin.productos.index') }}" 
-                   class="d-flex align-items-center text-decoration-none text-dark px-3 py-2 rounded mb-1 hover-item">
-                    <i class="bi bi-box-seam me-3"></i>
-                    <span>Productos</span>
+                    class="list-group-item list-group-item-action d-flex align-items-center border-0 py-3 rounded-3 mb-1">
+                    <i class="bi bi-box-seam fs-5 text-success me-3"></i>
+                    <span class="fw-semibold">Productos</span>
                 </a>
 
                 <a href="{{ route('admin.pedidos.index') }}" 

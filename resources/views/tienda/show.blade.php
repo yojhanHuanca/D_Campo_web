@@ -491,6 +491,105 @@ document.querySelectorAll('.toggle-fav').forEach(btn => {
 });
 </script>
 
+<div id="chatProductoWidget" class="position-fixed" style="bottom:20px; right:20px; z-index: 1050;">
+    <div id="chatCard" class="card shadow-lg border-0" style="width: 320px; display:none; border-radius: 18px;">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-robot"></i>
+                <div>
+                    <div class="fw-bold small mb-0">Asistente de producto</div>
+                    <small class="text-white-50">Responde con datos del backend</small>
+                </div>
+            </div>
+            <button class="btn btn-sm btn-outline-light" id="closeChat"><i class="bi bi-x"></i></button>
+        </div>
+        <div class="card-body" style="max-height: 360px; overflow-y: auto;">
+            <div id="chatMensajes" class="d-flex flex-column gap-3 small text-muted">
+                <div class="text-center text-muted small">¿Tienes dudas sobre este producto? Pregunta aquí.</div>
+            </div>
+        </div>
+        <div class="card-footer bg-light border-0">
+            <div class="input-group input-group-sm">
+                <input type="text" id="chatInput" class="form-control" placeholder="Escribe tu pregunta..." maxlength="200">
+                <button class="btn btn-success" id="enviarChat"><i class="bi bi-send"></i></button>
+            </div>
+            <div id="chatError" class="text-danger small mt-2 d-none"></div>
+        </div>
+    </div>
+    <button id="toggleChat" class="btn btn-success rounded-pill shadow-lg">
+        <i class="bi bi-chat-dots-fill me-1"></i>Ayuda del producto
+    </button>
+</div>
+
+<script>
+const chatCard = document.getElementById('chatCard');
+const toggleChat = document.getElementById('toggleChat');
+const closeChat = document.getElementById('closeChat');
+const enviarChat = document.getElementById('enviarChat');
+const chatInput = document.getElementById('chatInput');
+const chatMensajes = document.getElementById('chatMensajes');
+const chatError = document.getElementById('chatError');
+
+toggleChat?.addEventListener('click', () => {
+    chatCard.style.display = 'block';
+    toggleChat.style.display = 'none';
+    chatInput.focus();
+});
+
+closeChat?.addEventListener('click', () => {
+    chatCard.style.display = 'none';
+    toggleChat.style.display = 'inline-flex';
+});
+
+function appendMensaje(texto, origen = 'user') {
+    const bubble = document.createElement('div');
+    bubble.className = origen === 'user' ? 'ms-auto bg-success text-white rounded-3 px-3 py-2' : 'bg-light rounded-3 px-3 py-2';
+    bubble.style.maxWidth = '85%';
+    bubble.textContent = texto;
+    chatMensajes.appendChild(bubble);
+    chatMensajes.scrollTop = chatMensajes.scrollHeight;
+}
+
+async function enviarPregunta() {
+    const mensaje = chatInput.value.trim();
+    chatError.classList.add('d-none');
+    if (!mensaje) return;
+
+    appendMensaje(mensaje, 'user');
+    chatInput.value = '';
+
+    try {
+        const res = await fetch("{{ route('store.chat', $producto->id) }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ mensaje })
+        });
+        const data = await res.json();
+        if (!data.success) {
+            chatError.textContent = data.message || 'No pude responder en este momento.';
+            chatError.classList.remove('d-none');
+            return;
+        }
+        appendMensaje(data.respuesta || 'No tengo respuesta disponible.', 'bot');
+    } catch (e) {
+        chatError.textContent = 'Error al contactar al asistente.';
+        chatError.classList.remove('d-none');
+    }
+}
+
+enviarChat?.addEventListener('click', enviarPregunta);
+chatInput?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        enviarPregunta();
+    }
+});
+</script>
+
 <style>
     body { background: #f7f9f7; }
     .nav-pills .nav-link {

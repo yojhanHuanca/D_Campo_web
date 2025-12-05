@@ -135,7 +135,7 @@
                         @csrf
                         @method('DELETE')
                         <button class="btn btn-danger px-3 d-flex align-items-center gap-1">
-                            <i class="bi bi-trash"></i> Eliminar
+                            <i class="bi bi-trash"></i> Desaprobar 
                         </button>
                     </form>
 

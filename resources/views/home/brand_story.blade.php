@@ -1,4 +1,4 @@
-<section class="py-5 position-relative" id="brand-story">
+<section class="py-5 position-relative" id="nosotros">
 
     {{-- Fondos decorativos --}}
     <div class="position-absolute top-0 end-0 bg-success bg-opacity-25 rounded-circle blur-div"></div>
@@ -8,7 +8,7 @@
         <div class="row align-items-center g-5">
 
             {{-- Imagenes --}}
-            <div class="col-md-6 position-relative">
+            <div class="col-md-6 position-relative" id="brand-gallery">
 
                 <div class="row g-3">
                     <div class="col-6">
@@ -46,9 +46,9 @@
             {{-- Texto --}}
             <div class="col-md-6">
 
-                <div class="badge bg-success bg-opacity-25 text-success px-4 py-2 mb-3 rounded-pill">
+                <a href="#brand-gallery" class="badge bg-success bg-opacity-25 text-success px-4 py-2 mb-3 rounded-pill text-decoration-none d-inline-flex align-items-center gap-2">
                     <i class="bi bi-heart-fill"></i> Nuestra Historia
-                </div>
+                </a>
 
                 <h2 class="fw-bold mb-4">Inspirados por la belleza natural</h2>
 

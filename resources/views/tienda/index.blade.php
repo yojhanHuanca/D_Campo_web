@@ -14,8 +14,8 @@
 @php
     // Pega aquí las URLs de las imágenes para cada slide del carrusel
     $heroImages = $heroImages ?? [
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyjV9fYZ6cYhdGtlUq3-Rcg5BsE8L4_-HCwSu9B2VifudUZvrmLrtEZVs&s',
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyjV9fYZ6cYhdGtlUq3-Rcg5BsE8L4_-HCwSu9B2VifudUZvrmLrtEZVs&s',
+        'https://www.shutterstock.com/image-photo/whole-cut-avocados-on-light-600nw-2608036971.jpg',
+        'https://www.senasa.gob.pe/senasacontigo/wp-content/uploads/2021/02/18-palta-hass.jpg',
         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyjV9fYZ6cYhdGtlUq3-Rcg5BsE8L4_-HCwSu9B2VifudUZvrmLrtEZVs&s',
     ];
 
@@ -362,14 +362,15 @@ document.addEventListener('DOMContentLoaded', function() {
     cards.forEach(card => {
         const icons = card.querySelector('.product-icons');
         const addBtn = card.querySelector('.product-add-btn');
+
+        // Mantener iconos visibles siempre
+        if (icons) icons.style.opacity = '1';
         
         card.addEventListener('mouseenter', function() {
-            if (icons) icons.style.opacity = '1';
             if (addBtn) addBtn.style.opacity = '1';
         });
         
         card.addEventListener('mouseleave', function() {
-            if (icons) icons.style.opacity = '0';
             if (addBtn) addBtn.style.opacity = '0';
         });
     });
@@ -447,13 +448,15 @@ document.addEventListener('DOMContentLoaded', function() {
         height: 230px;
         overflow: hidden;
     }
-    .product-icons,
+    .product-icons {
+        opacity: 1;
+        z-index: 10;
+    }
     .product-add-btn {
         opacity: 0;
         transition: opacity .25s ease;
         z-index: 10;
     }
-    .product-card:hover .product-icons,
     .product-card:hover .product-add-btn {
         opacity: 1;
     }
@@ -478,5 +481,115 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 </style>
 
+<div id="chatProductoWidget" class="position-fixed" style="bottom:20px; right:20px; z-index: 1050; display:none;">
+    <div id="chatCard" class="card shadow-lg border-0" style="width: 320px; border-radius: 18px;">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-robot"></i>
+                <div>
+                    <div class="fw-bold small mb-0" id="chatProductoNombre">Asistente de tienda</div>
+                    <small class="text-white-50">Productos, envíos, cupones</small>
+                </div>
+            </div>
+            <button class="btn btn-sm btn-outline-light" id="closeChat"><i class="bi bi-x"></i></button>
+        </div>
+        <div class="card-body" style="max-height: 360px; overflow-y: auto;">
+            <div id="chatMensajes" class="d-flex flex-column gap-3 small text-muted">
+                <div class="text-center text-muted small">¿Tienes dudas sobre este producto? Pregunta aquí.</div>
+            </div>
+        </div>
+        <div class="card-footer bg-light border-0">
+            <div class="d-flex gap-2 flex-wrap mb-2" id="chatSugerencias">
+                <button class="btn btn-outline-success btn-sm quick-btn" data-msg="¿Qué cupones activos hay y hasta cuándo?">Cupones</button>
+                <button class="btn btn-outline-success btn-sm quick-btn" data-msg="¿Qué productos tienen para cocinar?">Culinarios</button>
+                <button class="btn btn-outline-success btn-sm quick-btn" data-msg="¿Tienen envíos a provincias?">Envíos</button>
+            </div>
+            <div class="input-group input-group-sm">
+                <input type="text" id="chatInput" class="form-control" placeholder="Escribe tu pregunta..." maxlength="200">
+                <button class="btn btn-success" id="enviarChat"><i class="bi bi-send"></i></button>
+            </div>
+            <div id="chatError" class="text-danger small mt-2 d-none"></div>
+        </div>
+    </div>
+</div>
+<button id="toggleChat" class="btn btn-success rounded-pill shadow-lg position-fixed" style="bottom:20px; left:20px; z-index:1050;">
+    <i class="bi bi-chat-dots-fill me-1"></i> Asistente de tienda
+</button>
+
+<script>
+    const chatEndpoint = "{{ route('store.chat.catalogo') }}";
+    const chatWidget = document.getElementById('chatProductoWidget');
+    const chatCard = document.getElementById('chatCard');
+    const chatMensajes = document.getElementById('chatMensajes');
+    const chatInput = document.getElementById('chatInput');
+    const chatError = document.getElementById('chatError');
+    const toggleChat = document.getElementById('toggleChat');
+    const quickBtns = document.querySelectorAll('.quick-btn');
+
+    function appendMensaje(texto, origen = 'user') {
+        const bubble = document.createElement('div');
+        bubble.className = origen === 'user' ? 'ms-auto bg-success text-white rounded-3 px-3 py-2' : 'bg-light rounded-3 px-3 py-2';
+        bubble.style.maxWidth = '85%';
+        bubble.textContent = texto;
+        chatMensajes.appendChild(bubble);
+        chatMensajes.scrollTop = chatMensajes.scrollHeight;
+    }
+
+    async function enviarPregunta() {
+        const mensaje = chatInput.value.trim();
+        chatError.classList.add('d-none');
+        if (!mensaje) return;
+
+        appendMensaje(mensaje, 'user');
+        chatInput.value = '';
+
+        try {
+            const res = await fetch(chatEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ mensaje })
+            });
+            const data = await res.json();
+            if (!data.success) {
+                chatError.textContent = data.message || 'No pude responder en este momento.';
+                chatError.classList.remove('d-none');
+                return;
+            }
+            appendMensaje(data.respuesta || 'No tengo respuesta disponible.', 'bot');
+        } catch (e) {
+            chatError.textContent = 'Error al contactar al asistente.';
+            chatError.classList.remove('d-none');
+        }
+    }
+
+    toggleChat?.addEventListener('click', () => {
+        chatWidget.style.display = 'block';
+        chatMensajes.innerHTML = '<div class="text-center text-muted small">¿Tienes dudas sobre nuestros productos? Pregunta aquí.</div>';
+        chatInput.focus();
+    });
+
+    quickBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            chatInput.value = btn.dataset.msg || '';
+            enviarPregunta();
+        });
+    });
+
+    document.getElementById('enviarChat')?.addEventListener('click', enviarPregunta);
+    chatInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            enviarPregunta();
+        }
+    });
+
+    document.getElementById('closeChat')?.addEventListener('click', () => {
+        chatWidget.style.display = 'none';
+    });
+</script>
 </body>
 </html>

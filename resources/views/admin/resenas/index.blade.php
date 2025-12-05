@@ -264,7 +264,7 @@
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill">
                                     <i class="bi bi-trash3 me-1"></i>
-                                    Eliminar
+                                    Desaprobar
                                 </button>
                             </form>
                     
