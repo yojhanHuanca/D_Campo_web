@@ -47,24 +47,6 @@ class CheckoutController extends Controller
     }
 
     // ============================
-    //   VISTA POPUP CULQI (FALLBACK)
-    // ============================
-    public function culqiForm(Request $request)
-    {
-        $user = Auth::user();
-        $total = $request->query('total', session('monto_tarjeta', 0));
-
-        if (!$user) {
-            return redirect()->route('auth.login.form')
-                ->with('error', 'Debes iniciar sesiÃ³n para pagar.');
-        }
-
-        return view('checkout.culqi_pago', [
-            'total' => $total,
-        ]);
-    }
-
-    // ============================
     //   GUARDAR ENVÍO
     // ============================
     public function guardarEnvio(Request $request)
@@ -202,65 +184,6 @@ class CheckoutController extends Controller
     }
 
 
-
-    // ============================
-    //   FORMULARIO DE PAGO CON CULQI
-
-    public function culqiToken(Request $request)
-{
-    $user = Auth::user();
-
-    $request->validate([
-        'token' => 'required|string',
-    ]);
-
-    // 1. Verificar dirección de envío
-    $direccionEnvioId = session('direccion_envio_id');
-    if (!$direccionEnvioId) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Falta la información de envío.'
-        ], 422);
-    }
-
-    // 2. Obtener carrito
-    $items = CartItem::where('user_id', $user->id)->with('producto')->get();
-    if ($items->isEmpty()) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Tu carrito está vacío.'
-        ], 422);
-    }
-
-    // 3. Calcular totales (aplicando cupón si existe)
-    $subtotal = $items->sum(fn($item) => $item->producto->precio * $item->cantidad);
-    $igv      = $subtotal * 0.18;
-    $envio    = 10;
-    $descuento = session('cupon_descuento', 0);
-    $total    = ($subtotal + $igv + $envio) - $descuento;
-
-    // 4. Crear registro de pago (simulando pago aprobado)
-    $pago = Pago::create([
-        'user_id'            => $user->id,
-        'direccion_envio_id' => $direccionEnvioId,
-        'metodo_pago'        => 'tarjeta',
-        'monto'              => $total,
-        'estado'             => 'pagado',          // ✅ Culqi validó la tarjeta (simulado)
-        'codigo_operacion'   => $request->token,   // Guardamos el token como referencia
-        'numero_tarjeta'     => null,
-        'nombre_titular'     => null,
-        'vencimiento'        => null,
-        'cvv'                => null,
-        'comprobante'        => null,
-    ]);
-
-    // 5. Guardar en sesión para la vista resumen
-    session(['pago_id' => $pago->id]);
-
-    return response()->json([
-        'success' => true,
-    ]);
-}
 
     // ============================
     //   GUARDAR PAGO

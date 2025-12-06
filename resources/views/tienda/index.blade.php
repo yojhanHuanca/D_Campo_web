@@ -21,6 +21,10 @@
 
     // Enlace opcional por slide (deja # si solo es imagen)
     $heroLinks = $heroLinks ?? ['#', '#', '#'];
+
+    $favoritosIds = auth()->check()
+        ? \App\Models\Favorito::where('user_id', auth()->id())->pluck('producto_id')->toArray()
+        : [];
 @endphp
 
 {{-- HERO CAROUSEL --}}
@@ -277,8 +281,12 @@
             <div class="col-lg-3 col-md-4 col-sm-6">
                 <div class="product-card card border-0 shadow-sm rounded-4 overflow-hidden h-100 position-relative bg-white">
                     <div class="position-absolute top-0 end-0 m-3 d-flex flex-column gap-2 product-icons">
-                        <button class="btn btn-white btn-sm rounded-circle shadow d-flex align-items-center justify-content-center">
-                            <i class="bi bi-heart text-danger"></i>
+                        @php $esFavorito = in_array($producto->id, $favoritosIds); @endphp
+                        <button type="button"
+                                class="btn btn-white btn-sm rounded-circle shadow d-flex align-items-center justify-content-center toggle-fav"
+                                data-producto="{{ $producto->id }}"
+                                aria-label="Favorito">
+                            <i class="bi {{ $esFavorito ? 'bi-heart-fill text-danger' : 'bi-heart text-danger' }}"></i>
                         </button>
                         <a href="{{ route('store.show', $producto->id) }}" class="btn btn-white btn-sm rounded-circle shadow d-flex align-items-center justify-content-center">
                             <i class="bi bi-eye text-success"></i>
@@ -590,6 +598,45 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('closeChat')?.addEventListener('click', () => {
         chatWidget.style.display = 'none';
     });
+</script>
+
+{{-- Favoritos y efectos --}}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const isAuth = {{ auth()->check() ? 'true' : 'false' }};
+    const loginUrl = "{{ route('auth.login.form') }}";
+    const csrf = "{{ csrf_token() }}";
+
+    document.querySelectorAll('.toggle-fav').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const productId = btn.dataset.producto;
+            if (!isAuth) {
+                window.location.href = loginUrl;
+                return;
+            }
+            fetch(`{{ url('/favorito') }}/${productId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrf,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(res => res.json())
+            .then(data => {
+                const icon = btn.querySelector('i');
+                if (data.favorito) {
+                    icon.className = 'bi bi-heart-fill text-danger';
+                } else {
+                    icon.className = 'bi bi-heart text-danger';
+                }
+            })
+            .catch(() => alert('No se pudo actualizar el favorito. Intenta nuevamente.'));
+        });
+    });
+});
 </script>
 </body>
 </html>

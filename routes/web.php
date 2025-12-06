@@ -160,14 +160,9 @@ Route::middleware('auth')->group(function () {
         ->name('checkout.pago.submit');
 
     //Prosesar pago
-    Route::post('/checkout/pago', [CheckoutController::class, 'procesarPago'])
-        ->name('checkout.pago.submit');
-    Route::get('/culqi/pagar', [CheckoutController::class, 'culqiForm'])
-        ->name('culqi.pagar.form');
+    // Pago con Culqi (real)
     Route::post('/culqi/pagar', [CulqiController::class, 'procesarPago'])
        ->name('culqi.pagar');
-    Route::post('/culqi/token', [CheckoutController::class, 'culqiToken'])
-       ->name('culqi.token');
     
 
     // CHECKOUT - RESUMEN

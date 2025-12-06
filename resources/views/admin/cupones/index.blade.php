@@ -199,8 +199,9 @@
                             <div class="modal-body">
                                 <div class="row g-3">
                                     <div class="col-md-8">
-                                        <label class="form-label fw-semibold small">Código del cupón *</label>
-                                        <input type="text" name="codigo" class="form-control" value="{{ $cupon->codigo }}" required>
+                                        <label class="form-label fw-semibold small">Código del cupón</label>
+                                        <input type="text" name="codigo" class="form-control codigo-input" value="{{ $cupon->codigo }}" placeholder="Deja en blanco para autogenerar">
+                                        <small class="text-muted">Se generará uno nuevo si lo dejas vacío.</small>
                                     </div>
 
                                     <div class="col-md-4">
@@ -287,8 +288,9 @@
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-8">
-                            <label class="form-label fw-semibold small">Código del cupón *</label>
-                            <input type="text" name="codigo" class="form-control" placeholder="Ej: NATURAL10" required>
+                            <label class="form-label fw-semibold small">Código del cupón</label>
+                            <input type="text" name="codigo" class="form-control codigo-input" placeholder="Se generará automático si lo dejas vacío">
+                            <small class="text-muted">Puedes escribir uno propio o dejar en blanco.</small>
                         </div>
 
                         <div class="col-md-4">
@@ -339,3 +341,23 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+    function generarCodigo(longitud = 8) {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code = '';
+        for (let i = 0; i < longitud; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return code;
+    }
+
+    document.querySelectorAll('.codigo-input').forEach(input => {
+        // Si el campo está vacío al cargar, sugiere un código visual sin enviarlo obligado
+        if (!input.value) {
+            input.placeholder = generarCodigo();
+        }
+    });
+</script>
+@endpush

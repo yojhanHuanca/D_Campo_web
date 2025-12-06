@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Cupon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class CuponController extends Controller
 {
@@ -32,7 +33,7 @@ class CuponController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'codigo' => 'required|unique:cupones,codigo',
+            'codigo' => 'nullable|unique:cupones,codigo',
             'tipo' => 'required|in:porcentaje,monto',
             'valor' => 'required|numeric|min:0',
             'descripcion' => 'nullable|string|max:255',
@@ -43,6 +44,9 @@ class CuponController extends Controller
         ]);
 
         $data = $request->all();
+        $data['codigo'] = $request->filled('codigo')
+            ? Str::upper($request->codigo)
+            : $this->generarCodigoUnico();
         $data['activo'] = $request->has('activo');
         Cupon::create($data);
 
@@ -63,7 +67,7 @@ class CuponController extends Controller
         $cupon = Cupon::findOrFail($id);
 
         $request->validate([
-            'codigo' => 'required|unique:cupones,codigo,' . $cupon->id,
+            'codigo' => 'nullable|unique:cupones,codigo,' . $cupon->id,
             'tipo' => 'required|in:porcentaje,monto',
             'valor' => 'required|numeric|min:0',
             'descripcion' => 'nullable|string|max:255',
@@ -74,6 +78,9 @@ class CuponController extends Controller
         ]);
 
         $data = $request->all();
+        $data['codigo'] = $request->filled('codigo')
+            ? Str::upper($request->codigo)
+            : $this->generarCodigoUnico();
         $data['activo'] = $request->has('activo');
         $cupon->update($data);
 
@@ -99,5 +106,14 @@ class CuponController extends Controller
         $cupon->save();
 
         return back();
+    }
+
+    private function generarCodigoUnico(int $length = 8): string
+    {
+        do {
+            $codigo = Str::upper(Str::random($length));
+        } while (Cupon::where('codigo', $codigo)->exists());
+
+        return $codigo;
     }
 }

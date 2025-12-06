@@ -6,291 +6,452 @@
     <title>Método de Pago - D'Campo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        body { background:#f7f7f7; }
-        .metodo-pago-btn {
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid #e0e0e0;
-        }
-        .metodo-pago-btn:hover {
-            border-color: #198754;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(25, 135, 84, 0.15);
-        }
-        .metodo-pago-btn.active {
-            border: 2px solid #198754;
-            background: linear-gradient(135deg, #f0f8f4 0%, #e8f5e9 100%);
-        }
-        .qr-container {
-            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
-            padding: 30px;
-            border-radius: 20px;
-        }
-    </style>
 </head>
-<body>
+<body class="bg-light">
 
-{{-- HEADER FIJO --}}
-<div class="position-sticky top-0 bg-white shadow-sm" style="z-index: 1000;">
+{{-- HEADER --}}
+<header class="bg-white shadow-sm position-sticky top-0" style="z-index: 1030;">
     
-    {{-- Navegación --}}
+    {{-- Barra Superior --}}
     <div class="border-bottom">
         <div class="container py-3">
             <div class="row align-items-center">
-                <div class="col-auto">
-                    <a href="{{ route('checkout.envio') }}" class="btn btn-link text-decoration-none text-dark">
-                        <i class="bi bi-arrow-left me-2"></i>Atrás
+                <div class="col-6 col-md-auto">
+                    <a href="{{ route('checkout.envio') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i>
+                        <span class="d-none d-sm-inline">Volver al envío</span>
+                        <span class="d-inline d-sm-none">Atrás</span>
                     </a>
                 </div>
-                <div class="col text-end">
-                    <div class="d-flex align-items-center justify-content-end gap-2">
-                        <div class="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center"
-                             style="width: 40px; height: 40px;">
-                            <span class="fw-bold text-success">D</span>
+
+                <div class="col-6 col-md text-end">
+                    <div class="d-inline-flex align-items-center gap-2">
+                        <div class="bg-success rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                            <span class="fw-bold text-white fs-5">D</span>
                         </div>
-                        <span class="fw-bold">D'CAMPO</span>
+                        <span class="fw-bold text-success d-none d-sm-inline">D'CAMPO</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- Progress Bar --}}
-    <div class="border-bottom py-4">
+    {{-- Barra de Progreso --}}
+    <div class="bg-white py-4">
         <div class="container">
-            <div class="d-flex justify-content-between align-items-center position-relative">
-                
-                <div class="position-absolute top-50 start-0 end-0 border-top border-2"></div>
+            <div class="row justify-content-center">
+                <div class="col-12 col-lg-10">
+                    <div class="d-flex justify-content-between align-items-center position-relative">
 
-                {{-- Carrito - Completado --}}
-                <div class="text-center position-relative" style="z-index: 1;">
-                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2"
-                        style="width: 50px; height: 50px;">
-                        <i class="bi bi-check-lg fs-4"></i>
+                        {{-- Línea de progreso --}}
+                        <div class="position-absolute top-50 start-0 end-0 translate-middle-y">
+                            <div class="progress" style="height: 3px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 66%"></div>
+                            </div>
+                        </div>
+
+                        {{-- Paso 1: Carrito (Completado) --}}
+                        <div class="text-center position-relative bg-light px-2" style="z-index: 1;">
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2 shadow-sm" style="width: 48px; height: 48px;">
+                                <i class="bi bi-check-lg fs-4"></i>
+                            </div>
+                            <small class="fw-semibold text-success d-none d-md-block">Carrito</small>
+                            <small class="fw-semibold text-success d-block d-md-none" style="font-size: 0.7rem;">Carrito</small>
+                        </div>
+
+                        {{-- Paso 2: Envío (Completado) --}}
+                        <div class="text-center position-relative bg-light px-2" style="z-index: 1;">
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2 shadow-sm" style="width: 48px; height: 48px;">
+                                <i class="bi bi-check-lg fs-4"></i>
+                            </div>
+                            <small class="fw-semibold text-success d-none d-md-block">Envío</small>
+                            <small class="fw-semibold text-success d-block d-md-none" style="font-size: 0.7rem;">Envío</small>
+                        </div>
+
+                        {{-- Paso 3: Pago (Activo) --}}
+                        <div class="text-center position-relative bg-light px-2" style="z-index: 1;">
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2 shadow" style="width: 48px; height: 48px;">
+                                <i class="bi bi-credit-card-fill fs-5"></i>
+                            </div>
+                            <small class="fw-semibold text-success d-none d-md-block">Pago</small>
+                            <small class="fw-semibold text-success d-block d-md-none" style="font-size: 0.7rem;">Pago</small>
+                        </div>
+
+                        {{-- Paso 4: Confirmar --}}
+                        <div class="text-center position-relative bg-light px-2" style="z-index: 1;">
+                            <div class="bg-white border border-2 border-secondary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 48px; height: 48px;">
+                                <i class="bi bi-check-circle fs-5 text-secondary"></i>
+                            </div>
+                            <small class="text-secondary d-none d-md-block">Revisar</small>
+                            <small class="text-secondary d-block d-md-none" style="font-size: 0.7rem;">Revisar</small>
+                        </div>
+
                     </div>
-                    <small class="text-success fw-semibold">Carrito</small>
                 </div>
-
-                {{-- Envío - Completado --}}
-                <div class="text-center position-relative" style="z-index: 1;">
-                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2"
-                        style="width: 50px; height: 50px;">
-                        <i class="bi bi-check-lg fs-4"></i>
-                    </div>
-                    <small class="text-success fw-semibold">Envío</small>
-                </div>
-
-                {{-- Pago - Activo --}}
-                <div class="text-center position-relative" style="z-index: 1;">
-                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2"
-                        style="width: 50px; height: 50px;">
-                        <i class="bi bi-credit-card fs-5"></i>
-                    </div>
-                    <small class="text-success fw-semibold">Pago</small>
-                </div>
-
-                {{-- Revisar - Pendiente --}}
-                <div class="text-center position-relative" style="z-index: 1;">
-                    <div class="bg-white border border-2 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2"
-                        style="width: 50px; height: 50px;">
-                        <i class="bi bi-check-circle fs-5 text-muted"></i>
-                    </div>
-                    <small class="text-muted">Revisar</small>
-                </div>
-
             </div>
         </div>
     </div>
-</div>
+</header>
 
-{{-- CONTENIDO --}}
-<div class="container my-5">
+{{-- CONTENIDO PRINCIPAL --}}
+<main class="container my-4 my-md-5">
     <div class="row justify-content-center">
-        <div class="col-lg-9">
+        <div class="col-12 col-lg-10 col-xl-9">
 
-            {{-- Título --}}
-            <div class="text-center mb-5">
-                <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 rounded-circle mb-3"
-                     style="width: 70px; height: 70px;">
-                    <i class="bi bi-credit-card text-success fs-1"></i>
+            {{-- Encabezado --}}
+            <div class="text-center mb-4 mb-md-5">
+                <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 rounded-circle mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-credit-card-2-front-fill text-success display-6"></i>
                 </div>
                 <h3 class="fw-bold mb-2">Método de Pago</h3>
-                <p class="text-muted">Selecciona tu método de pago preferido</p>
+                <p class="text-muted mb-0">Elige cómo quieres pagar tu pedido de forma segura</p>
             </div>
 
             <form id="formPago" action="{{ route('checkout.pago.submit') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
-                {{-- BOTONES DE MÉTODOS DE PAGO --}}
-                <div class="row g-3 mb-5">
+                {{-- MÉTODOS DE PAGO --}}
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-3 p-md-4">
+                        <h5 class="fw-bold mb-4">
+                            <i class="bi bi-wallet2 text-success me-2"></i>
+                            Selecciona tu método de pago
+                        </h5>
 
-                    {{-- Tarjeta --}}
-                    <div class="col-md-6 col-lg-4">
-                        <label class="metodo-pago-btn card border-2 h-100 text-center p-4 rounded-4" id="btn_tarjeta">
-                            <input type="radio" name="metodo_pago" value="tarjeta" class="d-none" />
-                            <i class="bi bi-credit-card-2-front text-success fs-1 d-block mb-3"></i>
-                            <h6 class="fw-bold mb-1">Tarjeta</h6>
-                            <small class="text-muted">Crédito/Débito</small>
-                        </label>
+                        <div class="row g-3">
+
+                            {{-- Tarjeta --}}
+                            <div class="col-12 col-sm-6 col-lg-4">
+                                <input type="radio" class="btn-check" name="metodo_pago" value="tarjeta" id="btn_tarjeta" autocomplete="off">
+                                <label class="btn btn-outline-success w-100 h-100 py-4 d-flex flex-column align-items-center justify-content-center" for="btn_tarjeta">
+                                    <i class="bi bi-credit-card-2-front-fill fs-1 mb-3"></i>
+                                    <h6 class="fw-bold mb-1">Tarjeta</h6>
+                                    <small class="text-muted">Crédito o Débito</small>
+                                    <div class="mt-3 d-flex gap-2">
+                                        <i class="bi bi-credit-card-fill text-primary"></i>
+                                        <i class="bi bi-credit-card-fill text-warning"></i>
+                                    </div>
+                                </label>
+                            </div>
+
+                            {{-- Yape --}}
+                            <div class="col-12 col-sm-6 col-lg-4">
+                                <input type="radio" class="btn-check" name="metodo_pago" value="yape" id="btn_yape" autocomplete="off">
+                                <label class="btn btn-outline-success w-100 h-100 py-4 d-flex flex-column align-items-center justify-content-center" for="btn_yape" style="background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);">
+                                    <i class="bi bi-phone-fill fs-1 mb-3" style="color: #6b2c91;"></i>
+                                    <h6 class="fw-bold mb-1">Yape</h6>
+                                    <small class="text-muted">Pago inmediato</small>
+                                    <div class="mt-3">
+                                        <span class="badge rounded-pill" style="background-color: #6b2c91;">Rápido</span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            {{-- Plin --}}
+                            <div class="col-12 col-sm-6 col-lg-4">
+                                <input type="radio" class="btn-check" name="metodo_pago" value="plin" id="btn_plin" autocomplete="off">
+                                <label class="btn btn-outline-success w-100 h-100 py-4 d-flex flex-column align-items-center justify-content-center" for="btn_plin" style="background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);">
+                                    <i class="bi bi-phone fs-1 mb-3 text-primary"></i>
+                                    <h6 class="fw-bold mb-1">Plin</h6>
+                                    <small class="text-muted">Pago inmediato</small>
+                                    <div class="mt-3">
+                                        <span class="badge bg-primary rounded-pill">Seguro</span>
+                                    </div>
+                                </label>
+                            </div>
+
+                        </div>
                     </div>
-
-                    {{-- Yape --}}
-                    <div class="col-md-6 col-lg-4">
-                        <label class="metodo-pago-btn card border-2 h-100 text-center p-4 rounded-4" id="btn_yape">
-                            <input type="radio" name="metodo_pago" value="yape" class="d-none" />
-                            <i class="bi bi-phone-fill text-success fs-1 d-block mb-3"></i>
-                            <h6 class="fw-bold mb-1">Yape</h6>
-                            <small class="text-muted">Pago móvil</small>
-                        </label>
-                    </div>
-
-                    {{-- Plin --}}
-                    <div class="col-md-6 col-lg-4">
-                        <label class="metodo-pago-btn card border-2 h-100 text-center p-4 rounded-4" id="btn_plin">
-                            <input type="radio" name="metodo_pago" value="plin" class="d-none" />
-                            <i class="bi bi-phone text-success fs-1 d-block mb-3"></i>
-                            <h6 class="fw-bold mb-1">Plin</h6>
-                            <small class="text-muted">Pago móvil</small>
-                        </label>
-                    </div>
-
                 </div>
 
                 {{-- CONTENIDO DINÁMICO --}}
-                <div class="row">
-                    <div class="col-12">
+                
+                {{-- Mensaje inicial --}}
+                <div class="card border-0 shadow-sm text-center py-5" id="mensaje_inicial">
+                    <div class="card-body">
+                        <i class="bi bi-hand-index text-muted display-1 mb-3"></i>
+                        <h5 class="text-muted mb-2">Selecciona un método de pago</h5>
+                        <p class="text-muted small mb-0">Elige tu opción preferida para continuar</p>
+                    </div>
+                </div>
 
-                                               {{-- TARJETA --}}
-                        <div class="card border-0 shadow-sm rounded-4 d-none" id="card_tarjeta">
-                            <div class="card-body p-5">
-                                <h5 class="fw-bold mb-4">
-                                    <i class="bi bi-credit-card-2-front text-success me-2"></i>
+                {{-- TARJETA --}}
+                <div class="card border-0 shadow-sm d-none" id="card_tarjeta">
+                    <div class="card-body p-3 p-md-4 p-lg-5">
+                        <div class="row align-items-center mb-4">
+                            <div class="col">
+                                <h5 class="fw-bold mb-1">
+                                    <i class="bi bi-credit-card-2-front-fill text-success me-2"></i>
                                     Pago con Tarjeta
                                 </h5>
-                                <p class="text-muted">Aquí se cargará el formulario de Culqi</p>
+                                <p class="text-muted mb-0 small">Procesado de forma segura por Culqi</p>
                             </div>
-                        </div>
-
-                        {{-- YAPE --}}
-                        <div class="card border-0 shadow-sm rounded-4 d-none" id="card_yape">
-                            <div class="card-body p-5">
-                                <div class="row align-items-center">
-                                    <div class="col-md-6">
-                                        <div class="qr-container text-center mb-4 mb-md-0" style="background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);">
-                                            <div class="bg-white rounded-3 p-4 d-inline-block mb-3">
-                                                <i class="bi bi-qr-code text-purple display-1"></i>
-                                            </div>
-                                            <h5 class="fw-bold text-purple mb-2">Escanea el código con Yape</h5>
-                                            <p class="text-purple mb-0">
-                                                <i class="bi bi-phone-fill me-1"></i>
-                                                <strong>999 888 777</strong>
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="alert alert-success bg-success bg-opacity-10 border-0 mb-4">
-                                            <h5 class="fw-bold mb-2">
-                                                <i class="bi bi-cash-coin me-2"></i>
-                                                Monto a pagar
-                                            </h5>
-                                            <h2 class="text-success fw-bold mb-0">S/ {{ number_format($total, 2) }}</h2>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold">Código de operación *</label>
-                                            <input type="text" name="codigo_operacion" 
-                                                   class="form-control form-control-lg border-0 bg-light"
-                                                   placeholder="Ej: 123456789">
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold">Subir comprobante (opcional)</label>
-                                            <input type="file" name="comprobante" 
-                                                   class="form-control form-control-lg border-0 bg-light"
-                                                   accept="image/*">
-                                        </div>
-                                    </div>
+                            <div class="col-auto">
+                                <div class="d-flex gap-2">
+                                    <i class="bi bi-credit-card-fill text-primary fs-3"></i>
+                                    <i class="bi bi-credit-card-fill text-warning fs-3"></i>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- PLIN --}}
-                        <div class="card border-0 shadow-sm rounded-4 d-none" id="card_plin">
-                            <div class="card-body p-5">
-                                <div class="row align-items-center">
-                                    <div class="col-md-6">
-                                        <div class="qr-container text-center mb-4 mb-md-0" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
-                                            <div class="bg-white rounded-3 p-4 d-inline-block mb-3">
-                                                <i class="bi bi-qr-code text-primary display-1"></i>
-                                            </div>
-                                            <h5 class="fw-bold text-primary mb-2">Escanea el código con Plin</h5>
-                                            <p class="text-primary mb-0">
-                                                <i class="bi bi-phone-fill me-1"></i>
-                                                <strong>999 888 777</strong>
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="alert alert-success bg-success bg-opacity-10 border-0 mb-4">
-                                            <h5 class="fw-bold mb-2">
-                                                <i class="bi bi-cash-coin me-2"></i>
-                                                Monto a pagar
-                                            </h5>
-                                            <h2 class="text-success fw-bold mb-0">S/ {{ number_format($total, 2) }}</h2>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold">Código de operación *</label>
-                                            <input type="text" name="codigo_operacion" 
-                                                   class="form-control form-control-lg border-0 bg-light"
-                                                   placeholder="Ej: 123456789">
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold">Subir comprobante (opcional)</label>
-                                            <input type="file" name="comprobante" 
-                                                   class="form-control form-control-lg border-0 bg-light"
-                                                   accept="image/*">
-                                        </div>
-                                    </div>
-                                </div>
+                        <div class="alert alert-info border-0 d-flex align-items-start mb-4">
+                            <i class="bi bi-shield-lock-fill text-info fs-4 me-3 mt-1"></i>
+                            <div>
+                                <strong class="d-block mb-1">Pago 100% seguro</strong>
+                                <small>Tus datos están protegidos con encriptación SSL de última generación</small>
                             </div>
                         </div>
 
-                        {{-- Mensaje inicial --}}
-                        <div class="text-center py-5" id="mensaje_inicial">
-                            <i class="bi bi-cursor text-muted display-1 mb-3"></i>
-                            <h5 class="text-muted">Selecciona un método de pago para continuar</h5>
+                        <div class="text-center py-4">
+                            <p class="text-muted mb-3">El formulario de pago se abrirá automáticamente</p>
+                            <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
                         </div>
 
+                        <div id="culqiError" class="alert alert-danger d-none"></div>
+                    </div>
+                </div>
+
+                {{-- YAPE --}}
+                <div class="card border-0 shadow-sm d-none" id="card_yape">
+                    <div class="card-body p-3 p-md-4">
+                        <h5 class="fw-bold mb-4">
+                            <i class="bi bi-phone-fill me-2" style="color: #6b2c91;"></i>
+                            Pagar con Yape
+                        </h5>
+
+                        <div class="row g-4">
+                            {{-- Columna izquierda: QR --}}
+                            <div class="col-12 col-md-6">
+                                <div class="text-center p-4 rounded-3" style="background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);">
+                                    <div class="bg-white rounded-3 p-4 shadow-sm mb-3">
+                                        <i class="bi bi-qr-code display-1" style="color: #6b2c91;"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-2" style="color: #6b2c91;">
+                                        <i class="bi bi-phone-fill me-2"></i>
+                                        Escanea con Yape
+                                    </h6>
+                                    <p class="mb-0 fw-bold fs-5" style="color: #6b2c91;">999 888 777</p>
+                                </div>
+
+                                <div class="alert alert-light border mt-3 mb-0">
+                                    <small class="d-block mb-2">
+                                        <i class="bi bi-1-circle-fill text-success me-2"></i>
+                                        Abre tu app Yape
+                                    </small>
+                                    <small class="d-block mb-2">
+                                        <i class="bi bi-2-circle-fill text-success me-2"></i>
+                                        Escanea el código QR
+                                    </small>
+                                    <small class="d-block">
+                                        <i class="bi bi-3-circle-fill text-success me-2"></i>
+                                        Ingresa el código aquí
+                                    </small>
+                                </div>
+                            </div>
+
+                            {{-- Columna derecha: Formulario --}}
+                            <div class="col-12 col-md-6">
+                                <div class="bg-success bg-opacity-10 rounded-3 p-4 mb-4">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <small class="text-success d-block mb-1">Monto a pagar</small>
+                                            <h2 class="text-success fw-bold mb-0">S/ {{ number_format($total, 2) }}</h2>
+                                        </div>
+                                        <i class="bi bi-cash-coin text-success display-4"></i>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">
+                                        Código de operación
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group input-group-lg shadow-sm">
+                                        <span class="input-group-text bg-white border-end-0">
+                                            <i class="bi bi-hash text-muted"></i>
+                                        </span>
+                                    <input type="text" 
+                                           name="codigo_operacion" 
+                                           data-metodo-codigo="yape"
+                                           class="form-control border-start-0"
+                                           placeholder="Ej: 123456789">
+                                    </div>
+                                    <small class="text-muted">Aparece en tu confirmación de Yape</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">
+                                        Captura de pantalla (opcional)
+                                    </label>
+                                    <input type="file" 
+                                           name="comprobante" 
+                                           class="form-control form-control-lg shadow-sm"
+                                           accept="image/*">
+                                    <small class="text-muted">Ayuda a verificar tu pago más rápido</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- PLIN --}}
+                <div class="card border-0 shadow-sm d-none" id="card_plin">
+                    <div class="card-body p-3 p-md-4">
+                        <h5 class="fw-bold mb-4">
+                            <i class="bi bi-phone text-primary me-2"></i>
+                            Pagar con Plin
+                        </h5>
+
+                        <div class="row g-4">
+                            {{-- Columna izquierda: QR --}}
+                            <div class="col-12 col-md-6">
+                                <div class="text-center p-4 rounded-3" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
+                                    <div class="bg-white rounded-3 p-4 shadow-sm mb-3">
+                                        <i class="bi bi-qr-code display-1 text-primary"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-primary mb-2">
+                                        <i class="bi bi-phone-fill me-2"></i>
+                                        Escanea con Plin
+                                    </h6>
+                                    <p class="mb-0 fw-bold text-primary fs-5">999 888 777</p>
+                                </div>
+
+                                <div class="alert alert-light border mt-3 mb-0">
+                                    <small class="d-block mb-2">
+                                        <i class="bi bi-1-circle-fill text-primary me-2"></i>
+                                        Abre tu app Plin
+                                    </small>
+                                    <small class="d-block mb-2">
+                                        <i class="bi bi-2-circle-fill text-primary me-2"></i>
+                                        Escanea el código QR
+                                    </small>
+                                    <small class="d-block">
+                                        <i class="bi bi-3-circle-fill text-primary me-2"></i>
+                                        Ingresa el código aquí
+                                    </small>
+                                </div>
+                            </div>
+
+                            {{-- Columna derecha: Formulario --}}
+                            <div class="col-12 col-md-6">
+                                <div class="bg-success bg-opacity-10 rounded-3 p-4 mb-4">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <small class="text-success d-block mb-1">Monto a pagar</small>
+                                            <h2 class="text-success fw-bold mb-0">S/ {{ number_format($total, 2) }}</h2>
+                                        </div>
+                                        <i class="bi bi-cash-coin text-success display-4"></i>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">
+                                        Código de operación
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group input-group-lg shadow-sm">
+                                        <span class="input-group-text bg-white border-end-0">
+                                            <i class="bi bi-hash text-muted"></i>
+                                        </span>
+                                         <input type="text" 
+                                                name="codigo_operacion" 
+                                                data-metodo-codigo="plin"
+                                                class="form-control border-start-0"
+                                                placeholder="Ej: 123456789">
+                                    </div>
+                                    <small class="text-muted">Aparece en tu confirmación de Plin</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">
+                                        Captura de pantalla (opcional)
+                                    </label>
+                                    <input type="file" 
+                                           name="comprobante" 
+                                           class="form-control form-control-lg shadow-sm"
+                                           accept="image/*">
+                                    <small class="text-muted">Ayuda a verificar tu pago más rápido</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 {{-- BOTONES DE NAVEGACIÓN --}}
-                <div class="row mt-5">
-                    <div class="col-12">
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-between">
-                            <a href="{{ route('checkout.envio') }}" class="btn btn-outline-secondary btn-lg rounded-pill px-5">
-                                <i class="bi bi-arrow-left me-2"></i>
-                                Volver al Envío
-                            </a>
-                            <button type="submit" formaction="{{ route('checkout.pago.submit') }}"
-                                     class="btn btn-success btn-lg rounded-pill px-5 shadow-sm">
-                                Revisar Pedido
-                                <i class="bi bi-arrow-right ms-2"></i>
-                            </button>
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-body p-3 p-md-4">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <a href="{{ route('checkout.envio') }}" class="btn btn-outline-secondary btn-lg w-100 rounded-pill">
+                                    <i class="bi bi-arrow-left-circle me-2"></i>
+                                    Volver al Envío
+                                </a>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <button type="submit" 
+                                        formaction="{{ route('checkout.pago.submit') }}"
+                                        class="btn btn-success btn-lg w-100 rounded-pill shadow-sm">
+                                    Revisar mi Pedido
+                                    <i class="bi bi-arrow-right-circle-fill ms-2"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
             </form>
 
+            {{-- Información de Seguridad --}}
+            <div class="row g-3 mt-4">
+                <div class="col-12 col-md-4">
+                    <div class="card border-0 bg-light h-100">
+                        <div class="card-body text-center p-3">
+                            <i class="bi bi-shield-lock-fill text-success fs-2 mb-2"></i>
+                            <small class="fw-semibold d-block">Pago Seguro</small>
+                            <small class="text-muted">Encriptación SSL</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="card border-0 bg-light h-100">
+                        <div class="card-body text-center p-3">
+                            <i class="bi bi-lightning-charge-fill text-success fs-2 mb-2"></i>
+                            <small class="fw-semibold d-block">Pago Rápido</small>
+                            <small class="text-muted">Confirmación inmediata</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="card border-0 bg-light h-100">
+                        <div class="card-body text-center p-3">
+                            <i class="bi bi-headset text-success fs-2 mb-2"></i>
+                            <small class="fw-semibold d-block">Soporte 24/7</small>
+                            <small class="text-muted">Siempre disponibles</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
-</div>
+</main>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{{-- FOOTER --}}
+<footer class="bg-white border-top mt-5 py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <small class="text-muted">
+                    <i class="bi bi-shield-check me-1"></i>
+                    Transacciones protegidas - © 2024 D'Campo
+                </small>
+            </div>
+        </div>
+    </div>
+</footer>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 {{-- Culqi v4 --}}
@@ -298,107 +459,102 @@
 
 <script>
     // ==========================
-    //   LÓGICA DE TABS Y DISEÑO
+    //   LÓGICA DE MÉTODOS DE PAGO
     // ==========================
-    const botones = {
-        tarjeta: document.getElementById('btn_tarjeta'),
-        yape: document.getElementById('btn_yape'),
-        plin: document.getElementById('btn_plin'),
-        transferencia: document.getElementById('btn_transferencia') ?? null
-    };
-
     const cards = {
         tarjeta: document.getElementById('card_tarjeta'),
         yape: document.getElementById('card_yape'),
-        plin: document.getElementById('card_plin'),
-        transferencia: document.getElementById('card_transferencia') ?? null
+        plin: document.getElementById('card_plin')
     };
-
     const mensajeInicial = document.getElementById('mensaje_inicial');
+    const codigosOperacion = document.querySelectorAll("input[data-metodo-codigo]");
 
     document.querySelectorAll("input[name='metodo_pago']").forEach(radio => {
         radio.addEventListener('change', function() {
             const metodo = this.value;
 
-            Object.values(botones).forEach(btn => btn && btn.classList.remove('active'));
             Object.values(cards).forEach(card => card && card.classList.add('d-none'));
+            cards[metodo]?.classList.remove('d-none');
+            mensajeInicial?.classList.add('d-none');
 
-            if (botones[metodo]) botones[metodo].classList.add('active');
-            if (cards[metodo]) cards[metodo].classList.remove('d-none');
+            codigosOperacion.forEach(inp => {
+                inp.removeAttribute('required');
+                inp.setAttribute('disabled', 'disabled');
+                inp.closest('.input-group')?.classList.remove('is-invalid');
+            });
 
-            mensajeInicial.classList.add('d-none');
-
-            // Si el usuario elige tarjeta, abrir Culqi de inmediato
             if (metodo === 'tarjeta') {
-                lanzarCulqi();
+                setTimeout(() => abrirCulqi(), 300);
+            } else if (metodo === 'yape' || metodo === 'plin') {
+                codigosOperacion.forEach(inp => {
+                    if (inp.dataset.metodoCodigo === metodo) {
+                        inp.removeAttribute('disabled');
+                        inp.setAttribute('required', 'required');
+                    }
+                });
             }
         });
     });
 
     // ==========================
-    //   INTEGRACIÓN CULQI TARJETA
+    //   INTEGRACIÓN CULQI
     // ==========================
-
-    // Llave pública desde .env
-    Culqi.publicKey = "{{ env('CULQI_PUBLIC_KEY') }}";
-
+    const culqiPublicKey = "{{ env('CULQI_PUBLIC_KEY') }}";
+    const culqiAmount = {{ intval($total * 100) }};
+    Culqi.publicKey = culqiPublicKey || '';
     const formPago = document.getElementById('formPago');
+    const culqiErrorBox = document.getElementById('culqiError');
+
+    function mostrarErrorCulqi(msg) {
+        if (culqiErrorBox) {
+            culqiErrorBox.textContent = msg;
+            culqiErrorBox.classList.remove('d-none');
+        } else {
+            alert(msg);
+        }
+    }
 
     formPago.addEventListener('submit', function (e) {
         const metodoSeleccionado = document.querySelector("input[name='metodo_pago']:checked")?.value;
-
-        // Solo interceptamos TARJETA. Yape / Plin siguen normal.
+        if (!metodoSeleccionado) {
+            e.preventDefault();
+            mostrarErrorCulqi('Selecciona un método de pago.');
+            return;
+        }
         if (metodoSeleccionado === 'tarjeta') {
-            e.preventDefault();  // No mandamos el form a Laravel todavía
-
-            lanzarCulqi();
+            e.preventDefault();
+            abrirCulqi();
         }
     });
 
-    let culqiConfigurado = false;
-    function configurarCulqi() {
-        if (culqiConfigurado) return;
-        Culqi.options({
-            lang: "es",
-            modal: true,
-            installments: false
-        });
-
+    function abrirCulqi() {
+        if (!culqiPublicKey) {
+            mostrarErrorCulqi('Falta la llave pública de Culqi (CULQI_PUBLIC_KEY).');
+            return;
+        }
+        if (culqiAmount <= 0) {
+            mostrarErrorCulqi('El monto a pagar debe ser mayor a 0.');
+            return;
+        }
+        Culqi.options({ lang: "es", modal: true, installments: false });
         Culqi.settings({
             title: "D'Campo",
             currency: "PEN",
-            amount: {{ intval($total * 100) }},          // Monto en centavos
+            amount: culqiAmount,
             email: "{{ auth()->user()->email }}"
         });
-
-        culqiConfigurado = true;
-    }
-
-    function lanzarCulqi() {
-        configurarCulqi();
         Culqi.open();
     }
 
-    // Cuando Culqi genera el token correctamente
     function enviarTokenCulqi(tokenId) {
         try { Culqi.close(); } catch (e) {}
-
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = "{{ route('culqi.pagar') }}";
-
-        const csrf = document.createElement('input');
-        csrf.type = 'hidden';
-        csrf.name = '_token';
-        csrf.value = "{{ csrf_token() }}";
-        form.appendChild(csrf);
-
-        const tokenInput = document.createElement('input');
-        tokenInput.type = 'hidden';
-        tokenInput.name = 'token';
-        tokenInput.value = tokenId;
-        form.appendChild(tokenInput);
-
+        form.innerHTML = `
+            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="token" value="${tokenId}">
+        `;
         document.body.appendChild(form);
         form.submit();
     }
@@ -407,24 +563,21 @@
         enviarTokenCulqi(token.id);
     });
 
-    // Callback global que Culqi v4 llama tras tokenizar
     window.culqi = function () {
         if (Culqi.token) {
             enviarTokenCulqi(Culqi.token.id);
         } else if (Culqi.error) {
-            alert(Culqi.error.user_message || 'Error en Culqi, intenta nuevamente.');
+            console.error('Culqi error:', Culqi.error);
+            mostrarErrorCulqi(Culqi.error.user_message || 'Error en Culqi, intenta nuevamente.');
             try { Culqi.close(); } catch (e) {}
         }
     };
 
-    // Si Culqi devuelve error antes de tokenizar
     Culqi.on('error', function (error) {
-        alert(error.user_message || 'Error en Culqi, intenta nuevamente.');
+        console.error('Culqi error (on error):', error);
+        mostrarErrorCulqi(error.user_message || 'Error en Culqi, intenta nuevamente.');
     });
-
-    // Al elegir tarjeta se abre Culqi (sin esperar a "Revisar pedido")
 </script>
-
 
 </body>
 </html>
