@@ -77,7 +77,7 @@ class PedidoAdminController extends Controller
         $pedido->save();
 
         return redirect()
-            ->back()
+            ->route('admin.pedidos.index')
             ->with('success', 'Estado del pedido actualizado correctamente.');
     }
 

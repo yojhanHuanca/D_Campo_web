@@ -7,7 +7,7 @@
     <div class="bg-white rounded-3 shadow-lg" style="max-width:550px; width:90%; max-height:85vh; overflow:hidden;">
 
         {{-- HEADER --}}
-        <div class="d-flex justify-content-between align-items-start p-3 border-bottom">
+        <div class="d-flex justify-content-between align-items-start p-3 border-bottom bg-light">
             <div>
                 <h6 class="fw-bold mb-1">Detalles del Pedido - DC-{{ $pedido->id }}</h6>
                 <p class="text-muted small mb-0">Revisa y actualiza el estado del pedido</p>
@@ -17,6 +17,23 @@
 
         {{-- BODY --}}
         <div class="p-3" style="overflow-y:auto; max-height:70vh;">
+            @php
+                $estadoColor = [
+                    'pendiente' => 'warning',
+                    'pagado' => 'info',
+                    'enviado' => 'primary',
+                    'entregado' => 'success',
+                    'cancelado' => 'danger',
+                ][$pedido->estado] ?? 'secondary';
+            @endphp
+
+            <div class="alert alert-{{ $estadoColor }} bg-opacity-10 border-0 d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-truck fs-5"></i>
+                <div>
+                    <div class="fw-semibold mb-0 text-capitalize">Estado: {{ $pedido->estado }}</div>
+                    <small class="text-muted">Actualiza el estado y se reflejará en el listado.</small>
+                </div>
+            </div>
 
             {{-- Info general --}}
             <div class="row mb-3">
@@ -131,7 +148,7 @@
             @endif
 
             {{-- Formulario para cambiar estado --}}
-            <form action="{{ route('admin.pedidos.cambiarEstado', $pedido->id) }}" method="POST" class="mt-3">
+            <form id="estadoForm" action="{{ route('admin.pedidos.cambiarEstado', $pedido->id) }}" method="POST" class="mt-3">
                 @csrf
 
                 <label class="form-label fw-semibold small mb-2">Actualizar estado</label>
@@ -152,8 +169,9 @@
                     </a>
 
                     <button type="submit"
-                            class="btn btn-sm btn-success rounded-pill px-3">
-                        Actualizar
+                            class="btn btn-sm btn-success rounded-pill px-3" id="submitEstado">
+                        <span class="submit-text">Actualizar</span>
+                        <span class="submit-spinner d-none spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     </button>
                 </div>
             </form>
@@ -161,4 +179,19 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    const formEstado = document.getElementById('estadoForm');
+    const submitBtn = document.getElementById('submitEstado');
+    const submitText = submitBtn?.querySelector('.submit-text');
+    const submitSpinner = submitBtn?.querySelector('.submit-spinner');
+
+    formEstado?.addEventListener('submit', () => {
+        submitBtn?.setAttribute('disabled', 'disabled');
+        submitText?.classList.add('opacity-0');
+        submitSpinner?.classList.remove('d-none');
+    });
+</script>
+@endpush
 @endsection

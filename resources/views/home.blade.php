@@ -10,4 +10,6 @@
 
     @include('home.brand_story')
 
+    @include('home.testimonials')
+
 @endsection

@@ -18,6 +18,13 @@
                 <small class="text-muted">Administra y actualiza el estado de los pedidos</small>
             </div>
         </div>
+
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
     
         {{-- BUSCADOR + FILTRO --}}
         <form method="GET" action="{{ route('admin.pedidos.index') }}" class="row g-2 mb-3">
